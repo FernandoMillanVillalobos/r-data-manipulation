@@ -232,7 +232,7 @@ download.file("http://bit.ly/BostonSnowfallCSV", "input/BostonWinterSnowfalls.cs
 # import data with rio locally
 snowdata2 <- rio::import("input/BostonWinterSnowfalls.csv")
 suicides <- rio::import("input/PDT-suicidesData.csv")
-rio::import("mySpreadsheet.xlsx", which = 2, col_names = c("City", "State", "Population"))
+# rio::import("mySpreadsheet.xlsx", which = 2, col_names = c("City", "State", "Population"))
 ```
 
 ### Import a file from the Web
@@ -253,7 +253,7 @@ design.tokens2 <- htmltab("https://designsystem.digital.gov/design-tokens/", whi
 # installing packages from GitHub with pacman
 pacman::p_load_gh("smach/rmiscutils")
 
-# changing those character strings that should be numbers back into numbers
+# changing those character strings that should be numbers back into numbersC
 citytable$PopEst2021 <- number_with_commas(citytable$`2021estimate`)
 citytable$Census2020 <- readr::parse_number(citytable$`2020census`)
 
@@ -262,11 +262,11 @@ citytable_cleaned <- janitor::clean_names(citytable)
 names(citytable_cleaned)
 ```
 
-### Import data from packages
+## Import data from packages
 
 If you are interested in state or local government data in the US or Canada, you may want to check out RSocrata to see if an agency you’re interested in posts data there. I’ve yet to find a complete list of all available Socrata data sets, but there’s a search page at https://www.opendatanetwork.com.
 
-### What’s a data frame? And what can you do with one?
+## What’s a data frame? And what can you do with one?
 
 It’s easy to add a column to a data frame. The name of the new column is on the left, and there’s a formula on the right. Some of these special dataframe functions (technically called “methods”) not only give you information, but let you change characteristics of the data frame. So, `names(snowdata)` tells you the column names in the data frame but it will change the column names in the data frame.
 
@@ -285,7 +285,7 @@ zips <- rio::import("input/bostonzips.txt", colClasses = c("character", "charact
 # rep("character", 2) is the same as c(“character”, “character”), so colClasses = rep("character", 2) is equivalent to colClasses = c("character", "character")
 ```
 
-# Exporting data
+## Exporting data
 
 Often after you’ve wrangled your data in R, you’ll want to save your results. Here are some of the ways to export your data:
 
@@ -301,7 +301,7 @@ You can also export an R object into your Windows or Mac clipboard with rio: `ri
 
 rio’s `convert()` function lets you convert one file type to another without having to manually pull the data into and then out of R.
 
-# Additional resources
+## Additional resources
 
 While rio is a great Swiss Army knife of file handling, there may be times when you want a bit more control over how your data is pulled into or saved out of R. In addition, there have been times when I’ve had a challenging data file that rio choked on but another package could handle. Some other functions and packages you may want to explore:
 
