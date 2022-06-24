@@ -1,5 +1,5 @@
 ---
-title: "Practical R for Mass Communication and Journalism"
+title: "r-data-manipulation"
 author: "Fernando Millan Villalobos"
 date: "`r Sys.Date()`"
 output:
