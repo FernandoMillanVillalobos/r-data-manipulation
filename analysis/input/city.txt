@@ -1,0 +1,10 @@
+New York, NY			66,834.6
+Kings, NY			34,722.9
+Bronx, NY			31,729.8
+Queens, NY			20,453.0
+Hudson, NJ			12,956.9
+Suffolk, MA			11,691.6
+Philadelphia, PA		11,241.1
+Washington, DC			9,378.0
+Alexandria IC, VA		8,552.2
+San Francisco, CA		16,526.2
