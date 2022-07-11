@@ -153,6 +153,8 @@ library(pacman)
 library(htmltab)
 library(rmiscutils)
 library(RSQLite)
+library(fs)
+library(openxlsx)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -217,7 +219,7 @@ knitr::read_chunk("scripts/outliers.R")
 source("scripts/outliers.R")
 ```
 
-# Import data into R
+# Import and export data with R
 
 There are some different ways to do this, depending on how your data is formatted and where it’s located.
 
@@ -290,6 +292,12 @@ city
 
 R can also export R data objects (usually data frames and matrices) as text files. To export data to a text file, use the `write.table` function.There are wrapper functions for `write.table` that call `write.table` with different defaults. These are useful if you want to create a file of comma-separated values.
 
+```{r}
+# write.table(snowdata, file = "output/snowdata.txt", quote = FALSE, sep = ",", row.names = FALSE)
+# write.csv(snowdata, file = "output/snowdata.csv", row.names = FALSE)
+```
+
+
 ### Importing data from databases
 
 In order to connect directly to a database from R, you will need to install some optional packages. The packages you need depend on the database(s) to which you want to connect and the connection method you want to use.
@@ -320,6 +328,57 @@ dbGetQuery(mydb, 'SELECT * FROM mtcars LIMIT 5')
 
 # disconnecting from dabase
 dbDisconnect(mydb)
+```
+
+## Tidyverse
+
+### Reading data
+
+El paquete readr, incluido en la familia tidyverse, admite la lectura de múltiples formatos de archivo usando funciones que comienzan por `read_*` o `write_*`. Por defecto, la función `read_excel()` importa la primera hoja. Para importar una hoja diferente es necesario indicarlo con el argumento sheet o bien el número o el nombre (segundo argumento). La función más importante para leer múltiples hojas es `map()` del paquete _purrr_ que forma para de la colección de paquetes tidyverse. `map()` permite aplicar una función a cada elemento de un vector o lista. Existe una variante de `map()` que directamente nos une todas las tablas por fila: `map_df()`. Si fuese necesario unir por columna, se debería usar `map_dfc()`.
+
+La función `dir_ls()` del paquete _fs_ (https://github.com/r-lib/fs), a pesar de ser similar a `dir()` de R Base, tiene algunas ventajas, como su total compatibilidad con la colección de funciones de _tidyverse_. Por ejemplo, el argumento `regexp` permite buscar con una expresión regular un patrón en las rutas y ficheros.
+
+[Funciones en readr](input/img/readr-tidyverse.png)
+
+```{r}
+horas_sol <- read_csv("input/SS_STAID001395.txt", skip = 19) |> # los datos empiezan en la linea 20
+  janitor::clean_names()
+head(horas_sol)
+
+# importing .xls file
+emisiones <- readxl::read_xls("input/env_air_gge.xls", sheet = 1, skip = 362, n_max = 36)
+head(emisiones)
+
+# iterate over multiple worksheets in a workbook
+path <- "input/madrid_temp.xlsx"
+mad <- path %>%
+  readxl::excel_sheets() %>%
+  set_names() %>%
+  map_df(readxl::read_excel,
+    path = path, .id = "yr"
+  )
+head(mad)
+
+# importing and reading several .xlsx files at once
+# without merging
+dir_ls("input", regexp = "xlsx") %>%
+  map(readxl::read_excel)
+
+# merging into a new column
+data_df <- dir_ls("input", regexp = "xlsx") %>% 
+  map_df(readxl::read_excel, .id = "city")
+# cleaning city column
+data_df <- mutate(data_df, city = path_file(city) %>% 
+                    path_ext_remove() %>% 
+                    str_replace("_temp", ""))
+head(data_df)
+```
+### Writing data
+
+The `write_csv` function writes tabular data to an ASCII file in CSV format. Each row of data creates one line in the file, with data items separated by commas (,). 
+
+```{r}
+# write_csv(horas_sol, "output/horas_sol.csv")
 ```
 
 ## Packages
@@ -403,6 +462,12 @@ You can also save a single object into a file with `saveRDS(myobject, file="file
 You can also export an R object into your Windows or Mac clipboard with rio: `rio::export(myObjectName, format = "clipboard")`. And, you can import data into R from your clipboard the same way: `rio::import(file = "clipboard")`.
 
 rio’s `convert()` function lets you convert one file type to another without having to manually pull the data into and then out of R.
+
+The _openxlsx_ package makes writing to Excel files relatively easy. While there are lots of options in _openxlsx_, a typical pattern is to specify an Excel filename and a sheet name.
+
+```{r}
+# write.xlsx(horas_sol, sheetName = "horas_sol", file = "output/horas_sol.xlsx")
+```
 
 ### Additional resources
 
