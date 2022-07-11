@@ -155,6 +155,11 @@ library(rmiscutils)
 library(RSQLite)
 library(fs)
 library(openxlsx)
+library(waldo)
+library(vcdExtra)
+library(psych)
+library(Hmisc)
+library(skimr)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -482,6 +487,57 @@ While rio is a great Swiss Army knife of file handling, there may be times when 
 If you are working with large data sets, speed may become important to you when saving and loading files. The __data.table__ package has a speedy `fread()` function, but beware that resulting objects are data.tables and not plain data frames; some behaviors are different. If you want a conventional data frame, you can get one with the `as.data.frame(mydatatable)` syntax. `fwrite()` function is aimed at writing to a CSV file considerably faster than base R’s `write.csv()`.
 
 The __feather__ package saves in a binary format that can be read either into R or Python. And, the __fst__ package’s `read.fst()` and `write.fst()` offer fast saving and loading of R data frame objects – plus the option of file compression.
+
+# Summarizing data sets
+
+## Base-R
+
+```{r}
+# returns column index names in table format
+data.frame(colnames(snowdata))
+# returns row index numbers in table format
+data.frame(as.integer(rownames(snowdata)))
+
+# getting a sense of the data set
+str(snowdata)
+# showing the number of rows and columns...
+dim(snowdata)
+nrow(snowdata)
+ncol(snowdata)
+
+# ...and names 
+dimnames(snowdata)
+rownames(snowdata)
+colnames(snowdata)
+
+# a brief statistical summary of a data set, run the summary() function
+summary(snowdata)
+```
+
+## Tidyverse
+
+```{r}
+glimpse(snowdata)
+```
+
+## Packages
+
+Find and concisely describe the difference between a pair of R objects with _waldo_ package. One of the first things worth doing after importing a data set is looking at the first few rows, the last few rows, and a summary of some basic stats. This can be easily achieved thanks to the `headTail()` function of the _psych_ package. To get a brief statistical summary you can use the `describe()` function of the _Hmisc_ package or the _psych_ package (only works for numeric data). The _skimr_ package’s `skim()` function will show information on each column, including a little histogram for each numeric one.
+
+```{r}
+df1 <- data.frame(X = c(1, 2, 3), Y = c("a", "b", "c"), A = c(3, 4, 5))
+df2 <- data.frame(X = c(1, 2, 3, 4), Y = c("A", "b", "c", "d"), Z = c("k", "l", "m", "n"), A = c("3", "4", "5", "6"))
+waldo::compare(df1, df2)
+
+# getting the first and last rows
+headTail(snowdata)
+
+# getting statistical info
+Hmisc::describe(snowdata)
+psych::describe(snowdata)
+skim(snowdata)
+```
+
 
 # Linting
 
