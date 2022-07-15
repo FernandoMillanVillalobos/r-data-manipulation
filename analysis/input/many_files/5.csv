@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+hyundai,tiburon,2,2008,4,manual(m5),f,20,28,r,subcompact
+mercury,mountaineer 4wd,4,1999,6,auto(l5),4,14,17,r,suv
+chevrolet,corvette,5.7,1999,8,auto(l4),r,15,23,p,2seater
+pontiac,grand prix,3.1,1999,6,auto(l4),f,18,26,r,midsize
+dodge,caravan 2wd,3.8,1999,6,auto(l4),f,15,22,r,minivan
+toyota,camry,2.2,1999,4,auto(l4),f,21,27,r,midsize
+audi,a4,2.8,1999,6,manual(m5),f,18,26,p,compact
+dodge,dakota pickup 4wd,3.9,1999,6,auto(l4),4,13,17,r,pickup
+audi,a4,1.8,1999,4,auto(l5),f,18,29,p,compact
+toyota,toyota tacoma 4wd,2.7,1999,4,auto(l4),4,16,20,r,pickup
+volkswagen,jetta,2,1999,4,manual(m5),f,21,29,r,compact
+ford,mustang,4,2008,6,auto(l5),r,16,24,r,subcompact
+audi,a4 quattro,3.1,2008,6,manual(m6),4,15,25,p,compact
+toyota,4runner 4wd,4,2008,6,auto(l5),4,16,20,r,suv
+subaru,forester awd,2.5,1999,4,auto(l4),4,18,24,r,suv
+honda,civic,1.6,1999,4,auto(l4),f,24,32,r,subcompact
+audi,a4 quattro,2.8,1999,6,auto(l5),4,15,25,p,compact
+hyundai,sonata,2.4,2008,4,auto(l4),f,21,30,r,midsize
+toyota,camry,3.5,2008,6,auto(s6),f,19,28,r,midsize
+subaru,forester awd,2.5,1999,4,manual(m5),4,18,25,r,suv

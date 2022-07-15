@@ -56,11 +56,11 @@ This report was generated on `r Sys.time()`. R version: `r paste0(version$major,
 
 ## R-Script & data
 
-The preprocessing and analysis of the data was conducted in the [R project for statistical computing](https://www.r-project.org/). The RMarkdown script used to generate this document and all the resulting data can be downloaded [under this link](http://`r user_name`.github.io/`r project_name`/). Through executing `main.Rmd`, the herein described process can be reproduced and this document can be generated. In the course of this, data from the folder `input` will be processed and results will be written to `output`. The html on-line version of the analysis can be accessed through this [link](https://`r user_name`.github.io/`r project_name`/). 
+The preprocessing and analysis of the data was conducted in the [R project for statistical computing](https://www.r-project.org/). The RMarkdown script used to generate this document and all the resulting data can be downloaded [under this link](http://%60r%20user_name%60.github.io/%60r%20project_name%60/). Through executing `main.Rmd`, the herein described process can be reproduced and this document can be generated. In the course of this, data from the folder `input` will be processed and results will be written to `output`. The html on-line version of the analysis can be accessed through this [link](https://%60r%20user_name%60.github.io/%60r%20project_name%60/).
 
 ## GitHub
 
-The code for the herein described process can also be freely downloaded from [https://github.com/`r user_name`/`r project_name`](https://github.com/`r user_name`/`r project_name`). 
+The code for the herein described process can also be freely downloaded from [https://github.com/`r user_name`/`r project_name`](https://github.com/%60r%20user_name%60/%60r%20project_name%60).
 
 ## License
 
@@ -70,11 +70,11 @@ The code for the herein described process can also be freely downloaded from [ht
 
 #### `abc.csv` (Example)
 
-| Attribute | Type | Description |
-|-------|------|-----------------------------------------------------------------------------|
-| a | Numeric | ... |
-| b | Numeric | ... |
-| c | Numeric |  ... |
+| Attribute | Type    | Description |
+|-----------|---------|-------------|
+| a         | Numeric | ...         |
+| b         | Numeric | ...         |
+| c         | Numeric | ...         |
 
 ...
 
@@ -226,17 +226,17 @@ source("scripts/outliers.R")
 
 # Import and export data with R
 
-There are some different ways to do this, depending on how your data is formatted and where it’s located.
+There are some different ways to do this, depending on how your data is formatted and where it's located.
 
 ## Base-R
 
 ### Entering data using R commands
 
-R provides a nice GUI for editing tabular data: __the data editor__.
+R provides a nice GUI for editing tabular data: **the data editor**.
 
 The `c` function has already been introduced as a way to input small amounts of data into R. When the amount of data is large, and especially when typing the data into the console is inappropriate, the `scan` function can be used. `scan` is most appropriate when all the data to be read is of the same mode, so that it can be accommodated by a vector or matrix. The first argument to `scan` can be a quoted string or character variable containing the name of a file or a URL, or it can be any of a number of connections to allow other input sources. If no first argument is given, scan will read from the console, stopping when a completely blank line is entered. By default, `scan` expects all of its input to be numeric data; this can be overridden with the `what=` argument, which specifies the type of data that scan will see.
 
-When reading from the console, R will prompt you with the index of the next item to be entered, and report on the number of elements read when it’s done. If the what= argument to scan is a list containing examples of the expected data types, scan will output a list with as many elements as there are data types provided. To specify numeric values, you can pass a value of 0.
+When reading from the console, R will prompt you with the index of the next item to be entered, and report on the number of elements read when it's done. If the what= argument to scan is a list containing examples of the expected data types, scan will output a list with as many elements as there are data types provided. To specify numeric values, you can pass a value of 0.
 
 Note that, by naming the elements in the list passed through the `what=` argument, the output list elements are appropriately named. When the argument to what= is a list, the `multi.line=` option can be set to FALSE to prevent scan from trying to use multiple lines to read the records for an observation. One of the most common uses for scan is to read in data matrices. Since scan returns a vector, a call to scan can be embedded inside a call to the matrix function.
 
@@ -268,7 +268,7 @@ top.5.salaries
 
 R includes a family of functions for importing delimited text files into R, based on the `read.table` function. The `read.table` function reads a text file into R and returns a data.frame object. Each row in the input file is interpreted as an observation. Each column in the input file represents a variable. The read.table function expects each field to be separated by a delimiter. The most important options are `sep` and `header`. R includes a set of convenience functions that call `read.table` with different default options for these values. Besides that, you can fetch a CSV file from a single URL.
 
-[read.table options](input/img/read.table-options.png)
+![read.table options](input/img/read.table-options.png)
 
 Although not as common as white-space-, tab-, or comma-separated data, sometimes input data is stored with no delimiters between the values, but with each variable occupying the same columns on each line of input. In cases like this, the `read.fwf` function can be used. The `widths=` argument can be a vector containing the widths of the fields to be read, using negative numbers to indicate columns to be skipped. If the data for each observation occupies more than one line, `widths=` can be a list of as many vectors as there are lines per observation. The `header=`, `row.names=`, and `col.names=` arguments behave similarly to those in `read.table`.
 
@@ -293,6 +293,7 @@ cat(file = ff, "New York, NY 66,834.6
 city <- read.fwf(ff, widths = c(18, -19, 8), as.is = TRUE)
 city
 ```
+
 ### Exporting data
 
 R can also export R data objects (usually data frames and matrices) as text files. To export data to a text file, use the `write.table` function.There are wrapper functions for `write.table` that call `write.table` with different defaults. These are useful if you want to create a file of comma-separated values.
@@ -302,16 +303,15 @@ R can also export R data objects (usually data frames and matrices) as text file
 # write.csv(snowdata, file = "output/snowdata.csv", row.names = FALSE)
 ```
 
-
 ### Importing data from databases
 
 In order to connect directly to a database from R, you will need to install some optional packages. The packages you need depend on the database(s) to which you want to connect and the connection method you want to use.
 
 There are two sets of database interfaces available in R:
 
-- __RODBC__. The RODBC package allows R to fetch data from ODBC (Open DataBase Connectivity) connections. ODBC provides a standard interface for different programs to connect to databases.
+-   **RODBC**. The RODBC package allows R to fetch data from ODBC (Open DataBase Connectivity) connections. ODBC provides a standard interface for different programs to connect to databases.
 
-- __DBI__. The DBI package allows R to connect to databases using native database drivers or JDBC drivers. This package provides a common database abstraction for R software.
+-   **DBI**. The DBI package allows R to connect to databases using native database drivers or JDBC drivers. This package provides a common database abstraction for R software.
 
 DBI is not a single package, but instead is a framework and set of packages for accessing databases.One important difference between the DBI packages and the RODBC package is in the objects they use: DBI uses S4 objects to represent drivers, connections, and other objects. To open a connection with DBI, use the dbConnect function. The argument drv can be a DBIDriver object or a character value describing the driver to use. You can generate a DBIDriver object with a call to the DBI driver. The dbConnect function can take additional options, depending on the type of database you are using. For SQLite databases, the most important argument is dbname (which specifies the database file). Check the help files for the database you are using for more options. Even arguments for parameters like usernames are not the same between databases.
 
@@ -339,17 +339,59 @@ dbDisconnect(mydb)
 
 ### Reading data
 
-El paquete readr, incluido en la familia tidyverse, admite la lectura de múltiples formatos de archivo usando funciones que comienzan por `read_*` o `write_*`. Por defecto, la función `read_excel()` importa la primera hoja. Para importar una hoja diferente es necesario indicarlo con el argumento sheet o bien el número o el nombre (segundo argumento). La función más importante para leer múltiples hojas es `map()` del paquete _purrr_ que forma para de la colección de paquetes tidyverse. `map()` permite aplicar una función a cada elemento de un vector o lista. Existe una variante de `map()` que directamente nos une todas las tablas por fila: `map_df()`. Si fuese necesario unir por columna, se debería usar `map_dfc()`.
+El paquete readr, incluido en la familia tidyverse, admite la lectura de múltiples formatos de archivo usando funciones que comienzan por `read_*` o `write_*`. Por defecto, la función `read_excel()` importa la primera hoja. Para importar una hoja diferente es necesario indicarlo con el argumento sheet o bien el número o el nombre (segundo argumento). La función más importante para leer múltiples hojas es `map()` del paquete *purrr* que forma para de la colección de paquetes tidyverse. `map()` permite aplicar una función a cada elemento de un vector o lista. Existe una variante de `map()` que directamente nos une todas las tablas por fila: `map_df()`. Si fuese necesario unir por columna, se debería usar `map_dfc()`.
 
-La función `dir_ls()` del paquete _fs_ (https://github.com/r-lib/fs), a pesar de ser similar a `dir()` de R Base, tiene algunas ventajas, como su total compatibilidad con la colección de funciones de _tidyverse_. Por ejemplo, el argumento `regexp` permite buscar con una expresión regular un patrón en las rutas y ficheros.
+La función `dir_ls()` del paquete *fs* (<https://github.com/r-lib/fs>), a pesar de ser similar a `dir()` de R Base, tiene algunas ventajas, como su total compatibilidad con la colección de funciones de *tidyverse*. Por ejemplo, el argumento `regexp` permite buscar con una expresión regular un patrón en las rutas y ficheros.
 
-[Funciones en readr](input/img/readr-tidyverse.png)
+![Funciones en readr](input/img/readr-tidyverse.png)
+
+Most of us would probably read the CSV file first and then do the data cleaning. For example, using the `clean_names` function from the _janitor_ package. The same can be achieved inside `read_csv` with the function `make_clean_names` for the `name_repair` argument. The function uses the snake naming convention by default. Snake converts all names to lowercase and separates words with an underscore. Besides that, `clean_names` does not work with vectors, but `make_clean_names` does.
+
+![List of all naming conventions](input/img/name-conventions.png) 
+
+With make_clean_names you can also replace certain characters from the column names. If you are familiar with regular expressions, you can make more complex replacements. Apart from cleaning your column names, you can also select columns directly from `read_csv` using the `col_select` argument.
+
+```{r}
+# janitor approach
+mpg_new <- read_csv("input/mpg_uppercase.csv") %>%
+  janitor::clean_names() %>%
+  select(c(manufacturer, model)) %>%
+  glimpse()
+
+# tidyverse approach
+read_csv("input/mpg_uppercase.csv", name_repair = make_clean_names) %>%
+  glimpse()
+
+# replacing and removing character strings with make_clean_names
+make_clean_names(c("A", "B%", "C"), replace = c("%" = "_percent"))
+# with reg expressions
+make_clean_names(c("A_1", "B_1", "C_1"), replace = c("^A_" = "a"))
+
+# snake naming convention per default
+make_clean_names(c("myHouse", "MyGarden"), case = "snake")
+make_clean_names(c("myHouse", "MyGarden"), case = "none")
+
+read_csv("input/mpg_uppercase.csv", name_repair = ~ make_clean_names(., case = "upper_camel")) %>% # The dot . in make_clean_names denotes the vector of column names. 
+  glimpse()
+
+# selecting specific columns
+read_csv("input/mpg_uppercase.csv", show_col_types = FALSE, name_repair = make_clean_names, col_select = c(manufacturer, model)) %>% 
+  glimpse()
+```
+You don’t always read just one file into R. It is not uncommon for your data to be scattered in hundreds or thousands of files. Of course, you don’t want to read these files into R manually. So you need an automatic method for reading in files. Before we can read the files into R, we need to create a character vector of the file paths. You have several options to create such a vector. You can use the R base function `list.files`, which returns character vectors of the names of files in a directory or you use the function `dir_ls` from the _fs_ package. The other option is to use the `dir_ls` function from the _fs_ package. _fs_ provides a cross-platform interface for accessing files on your hard disk. It supports all file operations (deleting, creating files, moving files, etc.).
+
+Now that we know the file paths, we can load the files into R. The tidyverse way to do this is to use the `map_dfr` function from the _purrr_ package. `map_dfr` loops through all the file paths and binds the data frames into a single data frame. The `.x` in the following code stands for the file name. To output the actual csv files and not the filenames, we need to put `.x` (the path) in a `read_*` function. In this example we are working with CSV files. The trick works the same for all rectangular file formats. Another approach is to use the `read_csv` function directly by putting the character vector of the file names directly into `read_csv`.
+
+Sometimes your files are deeply nested. In that case, we need to search through each folder recursively. If you try to load all csv files from the nested_folders folder, you would get an empty vector. This is because `dir_ls` does not look in the nested folders, but only in the parent folder. To make `dir_ls` search through the folders recursively, you need to set the `recurse` argument to `TRUE`. 
+
+You don’t always need all the files in your directory and need to remove some files from the list of file paths. A good way to do this is to use the `str_detect` function from the _stringr_ package. The function returns logical values. To change the actual character vector, we need to add these logical values to the character vector itself. With the `negate` argument you can find only the files that do not match the pattern.
 
 ```{r}
 horas_sol <- read_csv("input/SS_STAID001395.txt", skip = 19) |> # los datos empiezan en la linea 20
   janitor::clean_names()
 head(horas_sol)
 
+# .xlsx files
 # importing .xls file
 emisiones <- readxl::read_xls("input/env_air_gge.xls", sheet = 1, skip = 362, n_max = 36)
 head(emisiones)
@@ -377,19 +419,98 @@ data_df <- mutate(data_df, city = path_file(city) %>%
                     path_ext_remove() %>% 
                     str_replace("_temp", ""))
 head(data_df)
+
+# .csv files
+# adding new directory
+dir_create("input", c("many_files"))
+
+# creating random samples from mpg data set
+mpg_samples <- map(1:25, ~ slice_sample(mpg, n = 20))
+
+# adding .csv files from samples to the new directory
+iwalk(mpg_samples, ~ write_csv(., paste0("input/many_files/", .y, ".csv")))
+
+# creating a character vector of file paths
+# with list.files from Base-R
+(csv_files_list_files <- list.files(path = "input/many_files", pattern = "csv", full.names = TRUE))
+# with dir_ls from fs package
+(csv_files_dir_ls <- dir_ls(path = "input/many_files/", glob = "*.csv", type = "file"))
+
+# reading the files from a character vector of paths
+data_frames <- map_dfr(csv_files_dir_ls, ~ read_csv(.x, show_col_types = FALSE))
+glimpse(data_frames)
+# and with a new column representing the file name
+map_dfr(csv_files_dir_ls, ~ read_csv(.x, , show_col_types = FALSE) %>%
+  mutate(filename = .x)) %>%
+  glimpse()
+
+# using directly read_csv
+read_csv(csv_files_dir_ls, id = "filename", show_col_types = FALSE) %>% 
+  glimpse
+
+# inconsistent column names
+# generating the samples with inconsistent column names
+mpg_samples2 <- map(1:10, ~ slice_sample(mpg, n = 20))
+inconsistent_dframes <- map(mpg_samples2, ~ janitor::clean_names(dat = .x, case = "random"))
+map(inconsistent_dframes, ~ colnames(.x)) %>% 
+  head
+
+# selecting a random set of columns per data frame
+inconsistent_dframes <- map(inconsistent_dframes, ~ .x[sample(1:length(.x), sample(1:length(.x), 1))])
+map(inconsistent_dframes, ~ colnames(.x)) %>%
+  head()
+
+# saving to disk
+dir_create(c("input/unclean_files"))
+iwalk(inconsistent_dframes, ~ write_csv(.x, paste0("input/unclean_files/", .y, ".csv")))
+
+# loading and cleaning the data frames
+many_columns_data_frame <- dir_ls(path = "input/unclean_files/", glob = "*.csv", type = "file") %>%
+  map_dfr(~ read_csv(.x, name_repair = tolower, show_col_types = FALSE) %>% 
+            mutate(filename = .x))
+
+# showing results
+many_columns_data_frame %>% 
+  glimpse()
+
+# files not in the same folder
+mpg_samples3 <- map(1:40, ~ slice_sample(mpg, n = 20)) 
+
+# Create directories
+dir_create(c("input/nested_folders", "input/nested_folders/first_nested_folder", "input/nested_folders/second_nested_folder"))
+
+# First folder 
+iwalk(mpg_samples[1:20], ~ write_csv(.x, paste0("input/nested_folders/first_nested_folder/", .y, "_first.csv")))
+
+# Second folder 
+iwalk(mpg_samples[21:40], ~ write_csv(.x, paste0("input/nested_folders/second_nested_folder/", .y, "_second.csv")))
+
+# searching through nested folders recursively
+(csv_files_nested <- dir_ls("input/nested_folders/", glob = "*.csv", type = "file", recurse = TRUE))
+map_dfr(csv_files_nested, ~ read_csv(.x, show_col_types = FALSE) %>% 
+          mutate(filename = .x)) %>%
+  glimpse()
+
+# selecting the files to import from a string pattern
+csv_files_nested[str_detect(csv_files_nested, pattern = "[2-4]_first|second\\.csv$", negate = TRUE)] %>% 
+  map_dfr(~ read_csv(.x, show_col_types = FALSE) %>% 
+            mutate(filename = .x)) %>% 
+  glimpse()
 ```
+
 ### Writing data
 
-The `write_csv` function writes tabular data to an ASCII file in CSV format. Each row of data creates one line in the file, with data items separated by commas (,). 
+The `write_csv` function writes tabular data to an ASCII file in CSV format. Each row of data creates one line in the file, with data items separated by commas (,).
 
 ```{r}
 # write_csv(horas_sol, "output/horas_sol.csv")
 ```
 
 ## Packages
+
 ### The magic of rio
 
-“The aim of __rio__ is to make data file I/O [import/output] in R as easy as possible by implementing three simple functions in Swiss-army knife style,” according to the project’s GitHub page. Those functions are `import()`, `export()`, and `convert()`. So, the rio package has just one function to read in many different types of files: `import()`. Once you’ve analyzed your data, if you want to save the results as a CSV, Excel spreadsheet, or other format, rio’s `export()` function can handle that. You can use R’s `download.file` function with the syntax `download.file("url", "destinationFileName.csv")` to download files directly from the web. It’s possible rio will ask you to re-download the file in binary format, in which case you’ll need to run `download.file(“http://bit.ly/BostonSnowfallCSV”, “BostonWinterSnowfalls.csv”, mode=‘wb’`).
+"The aim of **rio** is to make data file I/O [import/output] in R as easy as possible by implementing three simple functions in Swiss-army knife style," according to the project's GitHub page. Those functions are `import()`, `export()`, and `convert()`. So, the rio package has just one function to read in many different types of files: `import()`. Once you've analyzed your data, if you want to save the results as a CSV, Excel spreadsheet, or other format, rio's `export()` function can handle that. You can use R's `download.file` function with the syntax `download.file("url", "destinationFileName.csv")` to download files directly from the web. It's possible rio will ask you to re-download the file in binary format, in which case you'll need to run `download.file(“http://bit.ly/BostonSnowfallCSV”, “BostonWinterSnowfalls.csv”, mode=‘wb’`).
 
 ```{r}
 # getting data from the web with R-built-in
@@ -402,11 +523,11 @@ suicides <- rio::import("input/PDT-suicidesData.csv")
 # rio::import("mySpreadsheet.xlsx", which = 2, col_names = c("City", "State", "Population"))
 ```
 
-#### Import a file from the Web 
+#### Import a file from the Web
 
-If you want to download and import a file from the Web, you can do so if it’s publicly available and in a format such as Excel or CSV you can use `rio`. A lot of systems will be able to follow the redirect URL to the file even after first giving you an error message, as long as you specify the format as “csv” since the file name here doesn’t include “.csv”. rio can also import well-formatted HTML tables from Web pages, but the tables have to be extremely well-formatted. In real life, though, Web data rarely appears in such neat, isolated form. A good option for cases that aren’t quite as well crafted is often the __htmltab__ package. Since it wasn't specified which table, it pulled the first HTML table on the page. To download a specific table use the `which` argument.
+If you want to download and import a file from the Web, you can do so if it's publicly available and in a format such as Excel or CSV you can use `rio`. A lot of systems will be able to follow the redirect URL to the file even after first giving you an error message, as long as you specify the format as "csv" since the file name here doesn't include ".csv". rio can also import well-formatted HTML tables from Web pages, but the tables have to be extremely well-formatted. In real life, though, Web data rarely appears in such neat, isolated form. A good option for cases that aren't quite as well crafted is often the **htmltab** package. Since it wasn't specified which table, it pulled the first HTML table on the page. To download a specific table use the `which` argument.
 
-The most popular way to install packages from GitHub is to use a package called __devtools__. devtools is an extremely powerful package designed mostly for people who want to write their own packages, and it includes a few ways to install packages from other places besides CRAN. However, devtools usually requires a couple of extra steps to install compared to a typical package. However, the __pacman__ package will also install packages from non-CRAN sources like GitHub. You can use the `number_with_commas()` function to change those character strings that should be numbers back into numbers. The __rmiscutils__ package isn’t the only way to deal with imported numbers that have commas, the tidyverse readr package also includes a function that turns character strings into numbers, `parse_number()`. One advantage of `readr::parse_number()` is that you can define your own `locale()` to control things like encoding and decimal marks. There’s an R package called __janitor__ that can automatically fix troublesome column names imported from a non-R-friendly data source. You can create new clean column names using janitor’s `clean_names()` function.
+The most popular way to install packages from GitHub is to use a package called **devtools**. devtools is an extremely powerful package designed mostly for people who want to write their own packages, and it includes a few ways to install packages from other places besides CRAN. However, devtools usually requires a couple of extra steps to install compared to a typical package. However, the **pacman** package will also install packages from non-CRAN sources like GitHub. You can use the `number_with_commas()` function to change those character strings that should be numbers back into numbers. The **rmiscutils** package isn't the only way to deal with imported numbers that have commas, the tidyverse readr package also includes a function that turns character strings into numbers, `parse_number()`. One advantage of `readr::parse_number()` is that you can define your own `locale()` to control things like encoding and decimal marks. There's an R package called **janitor** that can automatically fix troublesome column names imported from a non-R-friendly data source. You can create new clean column names using janitor's `clean_names()` function.
 
 ```{r}
 # getting data from the web with rio
@@ -431,11 +552,11 @@ names(citytable_cleaned)
 
 #### Import data from packages
 
-If you are interested in state or local government data in the US or Canada, you may want to check out RSocrata to see if an agency you’re interested in posts data there. I’ve yet to find a complete list of all available Socrata data sets, but there’s a search page at https://www.opendatanetwork.com.
+If you are interested in state or local government data in the US or Canada, you may want to check out RSocrata to see if an agency you're interested in posts data there. I've yet to find a complete list of all available Socrata data sets, but there's a search page at <https://www.opendatanetwork.com>.
 
-### What’s a data frame? And what can you do with one?
+### What's a data frame? And what can you do with one?
 
-It’s easy to add a column to a data frame. The name of the new column is on the left, and there’s a formula on the right. Some of these special dataframe functions (technically called “methods”) not only give you information, but let you change characteristics of the data frame. So, `names(snowdata)` tells you the column names in the data frame but it will change the column names in the data frame.
+It's easy to add a column to a data frame. The name of the new column is on the left, and there's a formula on the right. Some of these special dataframe functions (technically called "methods") not only give you information, but let you change characteristics of the data frame. So, `names(snowdata)` tells you the column names in the data frame but it will change the column names in the data frame.
 
 ```{r}
 # adding cols
@@ -454,21 +575,21 @@ zips <- rio::import("input/bostonzips.txt", colClasses = c("character", "charact
 
 ### Exporting data
 
-Often after you’ve wrangled your data in R, you’ll want to save your results. Here are some of the ways to export your data:
+Often after you've wrangled your data in R, you'll want to save your results. Here are some of the ways to export your data:
 
-- Save to a CSV file with `rio::export(myObjectName, file="myFileName.csv")` and to an Excel file with `rio::export(myObjectName, file="myFileName.xlsx")`. rio understands what file format you want based on the extension of the file name. There are several other available formats, including .tsv for tab-separated data, .json for JSON and .xml for XML.
+-   Save to a CSV file with `rio::export(myObjectName, file="myFileName.csv")` and to an Excel file with `rio::export(myObjectName, file="myFileName.xlsx")`. rio understands what file format you want based on the extension of the file name. There are several other available formats, including .tsv for tab-separated data, .json for JSON and .xml for XML.
 
-- Save to an R binary object that makes it easy to load back into R in future sessions. There are two options.
+-   Save to an R binary object that makes it easy to load back into R in future sessions. There are two options.
 
 Generic `save()` will save one or more objects into a file, such as `save(objectName1, objectName2, file="myfilename.RData")`. To read this data back into R, you just use the command `load("myfilename.RData")` and all the objects return with the same names in the same state they had before.
 
-You can also save a single object into a file with `saveRDS(myobject, file="filename.rds")`. The logical assumption would be that loadRDS would read the file back in, but instead the command is readRDS – and in this case, just the data has been stored, not the object name. So, you need to read the data into a new object name, such as `mydata <- readRDS("filename.rds")`.
+You can also save a single object into a file with `saveRDS(myobject, file="filename.rds")`. The logical assumption would be that loadRDS would read the file back in, but instead the command is readRDS -- and in this case, just the data has been stored, not the object name. So, you need to read the data into a new object name, such as `mydata <- readRDS("filename.rds")`.
 
 You can also export an R object into your Windows or Mac clipboard with rio: `rio::export(myObjectName, format = "clipboard")`. And, you can import data into R from your clipboard the same way: `rio::import(file = "clipboard")`.
 
-rio’s `convert()` function lets you convert one file type to another without having to manually pull the data into and then out of R.
+rio's `convert()` function lets you convert one file type to another without having to manually pull the data into and then out of R.
 
-The _openxlsx_ package makes writing to Excel files relatively easy. While there are lots of options in _openxlsx_, a typical pattern is to specify an Excel filename and a sheet name.
+The *openxlsx* package makes writing to Excel files relatively easy. While there are lots of options in *openxlsx*, a typical pattern is to specify an Excel filename and a sheet name.
 
 ```{r}
 # write.xlsx(horas_sol, sheetName = "horas_sol", file = "output/horas_sol.xlsx")
@@ -476,17 +597,17 @@ The _openxlsx_ package makes writing to Excel files relatively easy. While there
 
 ### Additional resources
 
-While rio is a great Swiss Army knife of file handling, there may be times when you want a bit more control over how your data is pulled into or saved out of R. In addition, there have been times when I’ve had a challenging data file that rio choked on but another package could handle. Some other functions and packages you may want to explore:
+While rio is a great Swiss Army knife of file handling, there may be times when you want a bit more control over how your data is pulled into or saved out of R. In addition, there have been times when I've had a challenging data file that rio choked on but another package could handle. Some other functions and packages you may want to explore:
 
-- Base R’s `read.csv()` and `read.table()` to import text files (use ?read.csv and ?read.table to get more information). `stringsAsFactors = FALSE` is needed with these if you want to keep your character strings as character strings. `write.csv()` will save to CSV.
+-   Base R's `read.csv()` and `read.table()` to import text files (use ?read.csv and ?read.table to get more information). `stringsAsFactors = FALSE` is needed with these if you want to keep your character strings as character strings. `write.csv()` will save to CSV.
 
-- Wickham’s readr package is also worth a look as part of the “tidyverse.” __readr__ includes functions to read CSV, tab-separated, fixed-width, Web logs, and several other types of files. readr prints out the type of data it has determined for each column – integer, character, double (non-whole numbers), etc. It creates tibbles.
+-   Wickham's readr package is also worth a look as part of the "tidyverse." **readr** includes functions to read CSV, tab-separated, fixed-width, Web logs, and several other types of files. readr prints out the type of data it has determined for each column -- integer, character, double (non-whole numbers), etc. It creates tibbles.
 
-- The __googlesheets__ package lets you import data from a Google Sheet, even if it’s private, by authenticating your Google account. The package is available on CRAN; install it with with `install.packages("googlesheets")`.
+-   The **googlesheets** package lets you import data from a Google Sheet, even if it's private, by authenticating your Google account. The package is available on CRAN; install it with with `install.packages("googlesheets")`.
 
-If you are working with large data sets, speed may become important to you when saving and loading files. The __data.table__ package has a speedy `fread()` function, but beware that resulting objects are data.tables and not plain data frames; some behaviors are different. If you want a conventional data frame, you can get one with the `as.data.frame(mydatatable)` syntax. `fwrite()` function is aimed at writing to a CSV file considerably faster than base R’s `write.csv()`.
+If you are working with large data sets, speed may become important to you when saving and loading files. The **data.table** package has a speedy `fread()` function, but beware that resulting objects are data.tables and not plain data frames; some behaviors are different. If you want a conventional data frame, you can get one with the `as.data.frame(mydatatable)` syntax. `fwrite()` function is aimed at writing to a CSV file considerably faster than base R's `write.csv()`.
 
-The __feather__ package saves in a binary format that can be read either into R or Python. And, the __fst__ package’s `read.fst()` and `write.fst()` offer fast saving and loading of R data frame objects – plus the option of file compression.
+The **feather** package saves in a binary format that can be read either into R or Python. And, the **fst** package's `read.fst()` and `write.fst()` offer fast saving and loading of R data frame objects -- plus the option of file compression.
 
 # Summarizing data sets
 
@@ -522,7 +643,7 @@ glimpse(snowdata)
 
 ## Packages
 
-Find and concisely describe the difference between a pair of R objects with _waldo_ package. One of the first things worth doing after importing a data set is looking at the first few rows, the last few rows, and a summary of some basic stats. This can be easily achieved thanks to the `headTail()` function of the _psych_ package. To get a brief statistical summary you can use the `describe()` function of the _Hmisc_ package or the _psych_ package (only works for numeric data). The _skimr_ package’s `skim()` function will show information on each column, including a little histogram for each numeric one.
+Find and concisely describe the difference between a pair of R objects with *waldo* package. One of the first things worth doing after importing a data set is looking at the first few rows, the last few rows, and a summary of some basic stats. This can be easily achieved thanks to the `headTail()` function of the *psych* package. To get a brief statistical summary you can use the `describe()` function of the *Hmisc* package or the *psych* package (only works for numeric data). The *skimr* package's `skim()` function will show information on each column, including a little histogram for each numeric one.
 
 ```{r}
 df1 <- data.frame(X = c(1, 2, 3), Y = c("a", "b", "c"), A = c(3, 4, 5))
@@ -538,10 +659,9 @@ psych::describe(snowdata)
 skim(snowdata)
 ```
 
-
 # Linting
 
-The code in this RMarkdown is linted with the [lintr package](https://github.com/jimhester/lintr), which is based on the  [tidyverse style guide](http://style.tidyverse.org/). 
+The code in this RMarkdown is linted with the [lintr package](https://github.com/jimhester/lintr), which is based on the [tidyverse style guide](http://style.tidyverse.org/).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
 # lintr::lint("main.Rmd", linters =

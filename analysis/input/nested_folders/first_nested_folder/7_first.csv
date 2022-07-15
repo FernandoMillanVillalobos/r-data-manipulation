@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+audi,a4 quattro,3.1,2008,6,auto(s6),4,17,25,p,compact
+dodge,dakota pickup 4wd,5.2,1999,8,auto(l4),4,11,15,r,pickup
+ford,f150 pickup 4wd,4.2,1999,6,auto(l4),4,14,17,r,pickup
+dodge,dakota pickup 4wd,4.7,2008,8,auto(l5),4,14,19,r,pickup
+volkswagen,jetta,2,1999,4,auto(l4),f,19,26,r,compact
+hyundai,sonata,3.3,2008,6,auto(l5),f,19,28,r,midsize
+dodge,dakota pickup 4wd,4.7,2008,8,auto(l5),4,14,19,r,pickup
+toyota,4runner 4wd,4.7,2008,8,auto(l5),4,14,17,r,suv
+volkswagen,new beetle,2.5,2008,5,auto(s6),f,20,29,r,subcompact
+nissan,altima,2.5,2008,4,manual(m6),f,23,32,r,midsize
+audi,a4,2.8,1999,6,auto(l5),f,16,26,p,compact
+audi,a4 quattro,2,2008,4,auto(s6),4,19,27,p,compact
+ford,mustang,4.6,1999,8,manual(m5),r,15,22,r,subcompact
+chevrolet,corvette,5.7,1999,8,auto(l4),r,15,23,p,2seater
+jeep,grand cherokee 4wd,4,1999,6,auto(l4),4,15,20,r,suv
+chevrolet,k1500 tahoe 4wd,6.5,1999,8,auto(l4),4,14,17,d,suv
+toyota,camry solara,3,1999,6,auto(l4),f,18,26,r,compact
+dodge,ram 1500 pickup 4wd,4.7,2008,8,manual(m6),4,12,16,r,pickup
+chevrolet,corvette,7,2008,8,manual(m6),r,15,24,p,2seater
+dodge,ram 1500 pickup 4wd,4.7,2008,8,manual(m6),4,12,16,r,pickup

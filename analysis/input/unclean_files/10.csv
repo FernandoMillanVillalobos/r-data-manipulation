@@ -1,0 +1,21 @@
+TrANs,MoDEl,cty,DIsPL,MANUFacTurEr,Fl,clASs,hWy,DrV,Year
+manual(m6),mustang,14,5.4,ford,p,subcompact,20,r,2008
+auto(l3),corolla,24,1.8,toyota,r,compact,30,f,1999
+auto(l4),civic,24,1.6,honda,r,subcompact,32,f,1999
+auto(l4),grand prix,16,3.8,pontiac,p,midsize,26,f,1999
+auto(l4),grand prix,18,3.1,pontiac,r,midsize,26,f,1999
+auto(av),a4,18,3.1,audi,p,compact,27,f,2008
+auto(l4),c1500 suburban 2wd,14,5.3,chevrolet,r,suv,20,r,2008
+auto(l4),pathfinder 4wd,14,3.3,nissan,r,suv,17,4,1999
+auto(l4),navigator 2wd,11,5.4,lincoln,r,suv,17,r,1999
+auto(l5),4runner 4wd,16,4,toyota,r,suv,20,4,2008
+auto(l4),caravan 2wd,11,3.3,dodge,e,minivan,17,f,2008
+auto(l5),mountaineer 4wd,13,4,mercury,r,suv,19,4,2008
+auto(s6),a6 quattro,17,3.1,audi,p,midsize,25,4,2008
+auto(l4),gti,19,2,volkswagen,r,compact,26,f,1999
+auto(l5),explorer 4wd,14,4,ford,r,suv,17,4,1999
+manual(m5),mustang,17,4,ford,r,subcompact,26,r,2008
+auto(av),altima,19,3.5,nissan,p,midsize,26,f,2008
+manual(m5),dakota pickup 4wd,14,3.9,dodge,r,pickup,17,4,1999
+auto(l4),corolla,26,1.8,toyota,r,compact,35,f,2008
+manual(m5),toyota tacoma 4wd,17,2.7,toyota,r,pickup,22,4,2008

@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+chevrolet,k1500 tahoe 4wd,5.3,2008,8,auto(l4),4,11,14,e,suv
+subaru,forester awd,2.5,2008,4,auto(l4),4,18,23,p,suv
+ford,mustang,4.6,1999,8,manual(m5),r,15,22,r,subcompact
+volkswagen,passat,2,2008,4,auto(s6),f,19,28,p,midsize
+chevrolet,corvette,6.2,2008,8,manual(m6),r,16,26,p,2seater
+dodge,ram 1500 pickup 4wd,4.7,2008,8,manual(m6),4,9,12,e,pickup
+volkswagen,jetta,2.5,2008,5,manual(m5),f,21,29,r,compact
+volkswagen,gti,2,1999,4,auto(l4),f,19,26,r,compact
+subaru,impreza awd,2.5,1999,4,auto(l4),4,19,26,r,subcompact
+ford,f150 pickup 4wd,4.6,1999,8,auto(l4),4,13,16,r,pickup
+land rover,range rover,4.4,2008,8,auto(s6),4,12,18,r,suv
+dodge,dakota pickup 4wd,3.9,1999,6,manual(m5),4,14,17,r,pickup
+chevrolet,c1500 suburban 2wd,6,2008,8,auto(l4),r,12,17,r,suv
+hyundai,sonata,2.4,1999,4,auto(l4),f,18,26,r,midsize
+pontiac,grand prix,3.8,1999,6,auto(l4),f,16,26,p,midsize
+land rover,range rover,4.6,1999,8,auto(l4),4,11,15,p,suv
+ford,explorer 4wd,4,1999,6,manual(m5),4,15,19,r,suv
+dodge,caravan 2wd,3.3,1999,6,auto(l4),f,16,22,r,minivan
+nissan,altima,3.5,2008,6,manual(m6),f,19,27,p,midsize
+honda,civic,1.8,2008,4,auto(l5),f,24,36,c,subcompact

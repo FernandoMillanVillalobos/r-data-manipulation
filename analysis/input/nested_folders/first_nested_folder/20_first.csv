@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+nissan,altima,3.5,2008,6,auto(av),f,19,26,p,midsize
+nissan,pathfinder 4wd,4,2008,6,auto(l5),4,14,20,p,suv
+subaru,impreza awd,2.5,1999,4,manual(m5),4,19,26,r,subcompact
+toyota,camry solara,3,1999,6,manual(m5),f,18,26,r,compact
+dodge,caravan 2wd,3.3,2008,6,auto(l4),f,17,24,r,minivan
+ford,f150 pickup 4wd,4.2,1999,6,manual(m5),4,14,17,r,pickup
+dodge,durango 4wd,5.2,1999,8,auto(l4),4,11,16,r,suv
+dodge,durango 4wd,4.7,2008,8,auto(l5),4,13,17,r,suv
+volkswagen,new beetle,1.9,1999,4,auto(l4),f,29,41,d,subcompact
+dodge,caravan 2wd,3.3,2008,6,auto(l4),f,17,24,r,minivan
+subaru,forester awd,2.5,2008,4,auto(l4),4,20,26,r,suv
+toyota,camry solara,2.2,1999,4,auto(l4),f,21,27,r,compact
+pontiac,grand prix,3.8,2008,6,auto(l4),f,18,28,r,midsize
+chevrolet,c1500 suburban 2wd,6,2008,8,auto(l4),r,12,17,r,suv
+hyundai,tiburon,2.7,2008,6,manual(m6),f,16,24,r,subcompact
+toyota,camry solara,2.4,2008,4,manual(m5),f,21,31,r,compact
+audi,a4,2,2008,4,manual(m6),f,20,31,p,compact
+toyota,camry solara,2.4,2008,4,auto(s5),f,22,31,r,compact
+toyota,4runner 4wd,3.4,1999,6,manual(m5),4,15,17,r,suv
+dodge,caravan 2wd,2.4,1999,4,auto(l3),f,18,24,r,minivan

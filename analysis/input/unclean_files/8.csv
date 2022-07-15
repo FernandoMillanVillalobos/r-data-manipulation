@@ -1,0 +1,21 @@
+MaNufactUREr,hwY,Displ,clAsS,Drv,YEAR,ctY,modEL,TrANS,Cyl,FL
+toyota,19,3.4,suv,4,1999,15,4runner 4wd,auto(l4),6,r
+dodge,12,4.7,suv,4,2008,9,durango 4wd,auto(l5),8,e
+hyundai,26,2.5,midsize,f,1999,18,sonata,auto(l4),6,r
+ford,16,4.6,pickup,4,1999,13,f150 pickup 4wd,auto(l4),8,r
+nissan,27,2.4,compact,f,1999,19,altima,auto(l4),4,r
+volkswagen,29,2,compact,f,1999,21,jetta,manual(m5),4,r
+volkswagen,24,2.8,compact,f,1999,17,gti,manual(m5),6,r
+ford,25,3.8,subcompact,r,1999,18,mustang,auto(l4),6,r
+hyundai,31,2.4,midsize,f,2008,21,sonata,manual(m5),4,r
+chevrolet,15,5.7,suv,4,1999,11,k1500 tahoe 4wd,auto(l4),8,r
+toyota,18,4,pickup,4,2008,15,toyota tacoma 4wd,manual(m6),6,r
+hyundai,26,2.4,midsize,f,1999,18,sonata,auto(l4),4,r
+nissan,25,3.5,midsize,f,2008,19,maxima,auto(av),6,p
+dodge,17,3.9,suv,4,1999,13,durango 4wd,auto(l4),6,r
+ford,20,5.4,subcompact,r,2008,14,mustang,manual(m6),8,p
+chevrolet,15,5.3,suv,r,2008,11,c1500 suburban 2wd,auto(l4),8,e
+dodge,12,4.7,pickup,4,2008,9,ram 1500 pickup 4wd,auto(l5),8,e
+lincoln,18,5.4,suv,r,2008,12,navigator 2wd,auto(l6),8,r
+hyundai,24,2.7,subcompact,f,2008,17,tiburon,manual(m5),6,r
+toyota,33,1.8,compact,f,1999,24,corolla,auto(l4),4,r

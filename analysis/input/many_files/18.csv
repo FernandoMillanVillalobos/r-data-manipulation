@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+volkswagen,passat,2.8,1999,6,manual(m5),f,18,26,p,midsize
+toyota,toyota tacoma 4wd,2.7,1999,4,auto(l4),4,16,20,r,pickup
+chevrolet,corvette,5.7,1999,8,auto(l4),r,15,23,p,2seater
+ford,explorer 4wd,5,1999,8,auto(l4),4,13,17,r,suv
+chevrolet,k1500 tahoe 4wd,5.7,1999,8,auto(l4),4,11,15,r,suv
+nissan,pathfinder 4wd,3.3,1999,6,auto(l4),4,14,17,r,suv
+subaru,forester awd,2.5,1999,4,auto(l4),4,18,24,r,suv
+dodge,caravan 2wd,3.3,1999,6,auto(l4),f,16,22,r,minivan
+subaru,forester awd,2.5,2008,4,manual(m5),4,19,25,p,suv
+dodge,durango 4wd,4.7,2008,8,auto(l5),4,9,12,e,suv
+toyota,toyota tacoma 4wd,4,2008,6,auto(l5),4,16,20,r,pickup
+subaru,impreza awd,2.2,1999,4,auto(l4),4,21,26,r,subcompact
+ford,mustang,4.6,1999,8,manual(m5),r,15,22,r,subcompact
+dodge,caravan 2wd,3.3,2008,6,auto(l4),f,17,24,r,minivan
+mercury,mountaineer 4wd,5,1999,8,auto(l4),4,13,17,r,suv
+dodge,dakota pickup 4wd,3.9,1999,6,manual(m5),4,14,17,r,pickup
+toyota,camry solara,2.4,2008,4,auto(s5),f,22,31,r,compact
+audi,a6 quattro,3.1,2008,6,auto(s6),4,17,25,p,midsize
+audi,a6 quattro,4.2,2008,8,auto(s6),4,16,23,p,midsize
+dodge,durango 4wd,4.7,2008,8,auto(l5),4,13,17,r,suv

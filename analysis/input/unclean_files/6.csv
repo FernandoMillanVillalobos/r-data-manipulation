@@ -1,0 +1,21 @@
+TraNS,Cyl,DrV,hWy,yeaR,diSPl,ModEL,Fl,CtY,cLASs
+auto(l4),6,f,26,1999,3.8,grand prix,p,16,midsize
+auto(l4),6,f,24,2008,2.7,tiburon,r,17,subcompact
+auto(s6),5,f,29,2008,2.5,jetta,r,21,compact
+auto(l4),6,r,25,1999,3.8,mustang,r,18,subcompact
+auto(l4),4,f,27,1999,2.4,altima,r,19,compact
+manual(m6),8,4,16,2008,4.7,ram 1500 pickup 4wd,r,12,pickup
+auto(l4),8,4,15,1999,5.4,f150 pickup 4wd,r,11,pickup
+auto(l5),6,f,28,2008,3.3,sonata,r,19,midsize
+auto(l5),4,f,29,1999,1.8,a4,p,18,compact
+manual(m5),6,4,17,1999,4.2,f150 pickup 4wd,r,14,pickup
+auto(l4),8,r,17,1999,5.7,c1500 suburban 2wd,r,13,suv
+auto(l5),6,r,24,2008,4,mustang,r,16,subcompact
+auto(l5),8,4,17,2008,4.7,durango 4wd,r,13,suv
+manual(m5),6,4,25,1999,2.8,a4 quattro,p,17,compact
+auto(l3),4,f,24,1999,2.4,caravan 2wd,r,18,minivan
+manual(m5),4,f,29,1999,2,new beetle,r,21,subcompact
+auto(l4),6,f,26,1999,3,camry,r,18,midsize
+auto(l6),8,4,19,2008,4.6,mountaineer 4wd,r,13,suv
+auto(l5),6,4,25,1999,2.8,a4 quattro,p,15,compact
+manual(m6),4,f,31,2008,2,a4,p,20,compact

@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+jeep,grand cherokee 4wd,4.7,1999,8,auto(l4),4,14,17,r,suv
+chevrolet,corvette,5.7,1999,8,auto(l4),r,15,23,p,2seater
+volkswagen,new beetle,1.9,1999,4,manual(m5),f,35,44,d,subcompact
+nissan,altima,2.4,1999,4,auto(l4),f,19,27,r,compact
+dodge,caravan 2wd,3.3,2008,6,auto(l4),f,11,17,e,minivan
+toyota,4runner 4wd,4.7,2008,8,auto(l5),4,14,17,r,suv
+volkswagen,jetta,2,2008,4,manual(m6),f,21,29,p,compact
+dodge,ram 1500 pickup 4wd,5.2,1999,8,manual(m5),4,11,16,r,pickup
+toyota,camry solara,2.2,1999,4,manual(m5),f,21,29,r,compact
+ford,expedition 2wd,4.6,1999,8,auto(l4),r,11,17,r,suv
+ford,mustang,5.4,2008,8,manual(m6),r,14,20,p,subcompact
+toyota,camry solara,2.4,2008,4,manual(m5),f,21,31,r,compact
+nissan,maxima,3,1999,6,auto(l4),f,18,26,r,midsize
+subaru,impreza awd,2.5,1999,4,auto(l4),4,19,26,r,subcompact
+chevrolet,corvette,5.7,1999,8,manual(m6),r,16,26,p,2seater
+nissan,pathfinder 4wd,3.3,1999,6,auto(l4),4,14,17,r,suv
+volkswagen,jetta,2.8,1999,6,manual(m5),f,17,24,r,compact
+pontiac,grand prix,5.3,2008,8,auto(s4),f,16,25,p,midsize
+hyundai,sonata,2.4,2008,4,auto(l4),f,21,30,r,midsize
+subaru,impreza awd,2.2,1999,4,auto(l4),4,21,26,r,subcompact

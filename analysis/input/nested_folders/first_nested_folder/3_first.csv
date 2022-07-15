@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+nissan,altima,2.5,2008,4,auto(av),f,23,31,r,midsize
+subaru,impreza awd,2.5,2008,4,auto(s4),4,20,27,r,compact
+volkswagen,passat,2,2008,4,manual(m6),f,21,29,p,midsize
+toyota,camry solara,2.4,2008,4,auto(s5),f,22,31,r,compact
+chevrolet,corvette,6.2,2008,8,manual(m6),r,16,26,p,2seater
+toyota,camry solara,3.3,2008,6,auto(s5),f,18,27,r,compact
+audi,a6 quattro,4.2,2008,8,auto(s6),4,16,23,p,midsize
+volkswagen,jetta,2,2008,4,auto(s6),f,22,29,p,compact
+ford,mustang,4.6,1999,8,manual(m5),r,15,22,r,subcompact
+dodge,caravan 2wd,2.4,1999,4,auto(l3),f,18,24,r,minivan
+ford,f150 pickup 4wd,4.6,1999,8,auto(l4),4,13,16,r,pickup
+land rover,range rover,4.6,1999,8,auto(l4),4,11,15,p,suv
+volkswagen,gti,2,2008,4,manual(m6),f,21,29,p,compact
+honda,civic,1.8,2008,4,auto(l5),f,25,36,r,subcompact
+dodge,durango 4wd,4.7,2008,8,auto(l5),4,13,17,r,suv
+audi,a4 quattro,3.1,2008,6,auto(s6),4,17,25,p,compact
+toyota,toyota tacoma 4wd,4,2008,6,manual(m6),4,15,18,r,pickup
+chevrolet,malibu,2.4,1999,4,auto(l4),f,19,27,r,midsize
+dodge,dakota pickup 4wd,3.7,2008,6,manual(m6),4,15,19,r,pickup
+audi,a4 quattro,2.8,1999,6,auto(l5),4,15,25,p,compact

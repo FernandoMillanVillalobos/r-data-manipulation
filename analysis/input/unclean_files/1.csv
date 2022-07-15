@@ -1,0 +1,21 @@
+HWY,TrAns,Fl,Class,Model,cyl,DRv
+30,auto(l4),r,midsize,sonata,4,f
+19,auto(l5),r,suv,explorer 4wd,6,4
+19,auto(l4),r,suv,k1500 tahoe 4wd,8,4
+12,manual(m6),e,pickup,ram 1500 pickup 4wd,8,4
+15,auto(l4),r,pickup,f150 pickup 4wd,8,4
+26,manual(m6),p,2seater,corvette,8,r
+26,auto(l4),r,midsize,grand prix,6,f
+34,manual(m5),r,subcompact,civic,4,f
+20,auto(l5),r,suv,4runner 4wd,6,4
+16,auto(l4),r,pickup,f150 pickup 4wd,8,4
+17,manual(m5),r,pickup,toyota tacoma 4wd,6,4
+17,auto(l4),r,suv,expedition 2wd,8,r
+31,auto(l5),r,midsize,camry,4,f
+17,auto(l4),r,suv,navigator 2wd,8,r
+29,manual(m6),p,midsize,passat,4,f
+29,auto(l5),p,compact,a4,4,f
+27,auto(l4),r,midsize,grand prix,6,f
+15,auto(l4),e,suv,c1500 suburban 2wd,8,r
+26,manual(m5),r,subcompact,mustang,6,r
+24,auto(l4),r,minivan,caravan 2wd,6,f

@@ -1,0 +1,21 @@
+manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
+volkswagen,new beetle,2,1999,4,manual(m5),f,21,29,r,subcompact
+ford,mustang,3.8,1999,6,manual(m5),r,18,26,r,subcompact
+audi,a6 quattro,2.8,1999,6,auto(l5),4,15,24,p,midsize
+subaru,impreza awd,2.5,2008,4,auto(s4),4,20,25,p,compact
+audi,a4 quattro,3.1,2008,6,auto(s6),4,17,25,p,compact
+ford,mustang,3.8,1999,6,auto(l4),r,18,25,r,subcompact
+ford,explorer 4wd,4,1999,6,manual(m5),4,15,19,r,suv
+mercury,mountaineer 4wd,5,1999,8,auto(l4),4,13,17,r,suv
+dodge,caravan 2wd,3.3,1999,6,auto(l4),f,16,22,r,minivan
+chevrolet,k1500 tahoe 4wd,5.3,2008,8,auto(l4),4,11,14,e,suv
+dodge,dakota pickup 4wd,3.9,1999,6,manual(m5),4,14,17,r,pickup
+ford,mustang,4,2008,6,auto(l5),r,16,24,r,subcompact
+hyundai,tiburon,2,1999,4,manual(m5),f,19,29,r,subcompact
+audi,a4 quattro,1.8,1999,4,manual(m5),4,18,26,p,compact
+mercury,mountaineer 4wd,4,1999,6,auto(l5),4,14,17,r,suv
+toyota,camry solara,3,1999,6,auto(l4),f,18,26,r,compact
+honda,civic,1.8,2008,4,auto(l5),f,25,36,r,subcompact
+honda,civic,2,2008,4,manual(m6),f,21,29,p,subcompact
+dodge,caravan 2wd,3.3,2008,6,auto(l4),f,11,17,e,minivan
+honda,civic,1.8,2008,4,manual(m5),f,26,34,r,subcompact
