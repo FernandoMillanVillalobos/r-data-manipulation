@@ -1,21 +1,21 @@
-mOdeL
-a4 quattro
-grand cherokee 4wd
-civic
-civic
-grand prix
-durango 4wd
-4runner 4wd
-maxima
-dakota pickup 4wd
-a4
-grand cherokee 4wd
-ram 1500 pickup 4wd
-f150 pickup 4wd
-pathfinder 4wd
-range rover
-jetta
-jetta
-maxima
-pathfinder 4wd
-camry solara
+CYl,FL,DISPL,hWY
+6,p,3.5,25
+6,p,3.1,25
+6,r,3.1,26
+4,r,2.4,31
+8,r,5.2,15
+8,r,4.7,15
+8,p,5.4,16
+8,r,4.7,17
+6,r,2.5,26
+6,r,4,26
+8,r,4.7,17
+8,r,5.4,17
+8,e,4.7,12
+6,r,2.8,24
+6,r,3,26
+6,r,3.8,22
+6,r,4,17
+8,r,4.7,19
+4,p,2,30
+8,r,5,17

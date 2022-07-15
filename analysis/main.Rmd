@@ -353,13 +353,13 @@ With make_clean_names you can also replace certain characters from the column na
 
 ```{r}
 # janitor approach
-mpg_new <- read_csv("input/mpg_uppercase.csv") %>%
+mpg_new <- read_csv("input/mpg_uppercase.csv", show_col_types = FALSE) %>%
   janitor::clean_names() %>%
   select(c(manufacturer, model)) %>%
   glimpse()
 
 # tidyverse approach
-read_csv("input/mpg_uppercase.csv", name_repair = make_clean_names) %>%
+read_csv("input/mpg_uppercase.csv", name_repair = make_clean_names, show_col_types = FALSE) %>%
   glimpse()
 
 # replacing and removing character strings with make_clean_names
@@ -371,7 +371,7 @@ make_clean_names(c("A_1", "B_1", "C_1"), replace = c("^A_" = "a"))
 make_clean_names(c("myHouse", "MyGarden"), case = "snake")
 make_clean_names(c("myHouse", "MyGarden"), case = "none")
 
-read_csv("input/mpg_uppercase.csv", name_repair = ~ make_clean_names(., case = "upper_camel")) %>% # The dot . in make_clean_names denotes the vector of column names. 
+read_csv("input/mpg_uppercase.csv", show_col_types = FALSE, name_repair = ~ make_clean_names(., case = "upper_camel")) %>% # The dot . in make_clean_names denotes the vector of column names. 
   glimpse()
 
 # selecting specific columns
@@ -422,13 +422,13 @@ head(data_df)
 
 # .csv files
 # adding new directory
-dir_create("input", c("many_files"))
+# dir_create("input", c("many_files"))
 
 # creating random samples from mpg data set
-mpg_samples <- map(1:25, ~ slice_sample(mpg, n = 20))
+# mpg_samples <- map(1:25, ~ slice_sample(mpg, n = 20))
 
 # adding .csv files from samples to the new directory
-iwalk(mpg_samples, ~ write_csv(., paste0("input/many_files/", .y, ".csv")))
+# iwalk(mpg_samples, ~ write_csv(., paste0("input/many_files/", .y, ".csv")))
 
 # creating a character vector of file paths
 # with list.files from Base-R
@@ -461,8 +461,8 @@ map(inconsistent_dframes, ~ colnames(.x)) %>%
   head()
 
 # saving to disk
-dir_create(c("input/unclean_files"))
-iwalk(inconsistent_dframes, ~ write_csv(.x, paste0("input/unclean_files/", .y, ".csv")))
+# dir_create(c("input/unclean_files"))
+# iwalk(inconsistent_dframes, ~ write_csv(.x, paste0("input/unclean_files/", .y, ".csv")))
 
 # loading and cleaning the data frames
 many_columns_data_frame <- dir_ls(path = "input/unclean_files/", glob = "*.csv", type = "file") %>%
@@ -477,13 +477,13 @@ many_columns_data_frame %>%
 mpg_samples3 <- map(1:40, ~ slice_sample(mpg, n = 20)) 
 
 # Create directories
-dir_create(c("input/nested_folders", "input/nested_folders/first_nested_folder", "input/nested_folders/second_nested_folder"))
+# dir_create(c("input/nested_folders", "input/nested_folders/first_nested_folder", "input/nested_folders/second_nested_folder"))
 
 # First folder 
-iwalk(mpg_samples[1:20], ~ write_csv(.x, paste0("input/nested_folders/first_nested_folder/", .y, "_first.csv")))
+# iwalk(mpg_samples[1:20], ~ write_csv(.x, paste0("input/nested_folders/first_nested_folder/", .y, "_first.csv")))
 
 # Second folder 
-iwalk(mpg_samples[21:40], ~ write_csv(.x, paste0("input/nested_folders/second_nested_folder/", .y, "_second.csv")))
+# iwalk(mpg_samples[21:40], ~ write_csv(.x, paste0("input/nested_folders/second_nested_folder/", .y, "_second.csv")))
 
 # searching through nested folders recursively
 (csv_files_nested <- dir_ls("input/nested_folders/", glob = "*.csv", type = "file", recurse = TRUE))

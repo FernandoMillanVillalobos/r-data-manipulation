@@ -1,21 +1,21 @@
-mOdEL,hwY,diSPl,CLaSS,Fl,TrAnS,dRV,maNufaCtureR,yeaR,cTY,CYl
-a4,30,2,compact,p,auto(av),f,audi,2008,21,4
-navigator 2wd,16,5.4,suv,p,auto(l4),r,lincoln,1999,11,8
-ram 1500 pickup 4wd,15,5.2,pickup,r,auto(l4),4,dodge,1999,11,8
-range rover,15,4,suv,p,auto(l4),4,land rover,1999,11,8
-a4,29,1.8,compact,p,auto(l5),f,audi,1999,18,4
-4runner 4wd,20,4,suv,r,auto(l5),4,toyota,2008,16,6
-ram 1500 pickup 4wd,17,4.7,pickup,r,auto(l5),4,dodge,2008,13,8
-civic,29,2,subcompact,p,manual(m6),f,honda,2008,21,4
-a4 quattro,27,2,compact,p,auto(s6),4,audi,2008,19,4
-camry solara,27,2.2,compact,r,auto(l4),f,toyota,1999,21,4
-ram 1500 pickup 4wd,12,4.7,pickup,e,auto(l5),4,dodge,2008,9,8
-impreza awd,26,2.5,subcompact,r,manual(m5),4,subaru,1999,19,4
-impreza awd,26,2.2,subcompact,r,manual(m5),4,subaru,1999,19,4
-grand prix,27,3.8,midsize,r,auto(l4),f,pontiac,1999,17,6
-pathfinder 4wd,17,3.3,suv,r,auto(l4),4,nissan,1999,14,6
-a4 quattro,25,3.1,compact,p,auto(s6),4,audi,2008,17,6
-a4,26,2.8,compact,p,manual(m5),f,audi,1999,18,6
-passat,26,2.8,midsize,p,manual(m5),f,volkswagen,1999,18,6
-tiburon,24,2.7,subcompact,r,auto(l4),f,hyundai,2008,17,6
-sonata,31,2.4,midsize,r,manual(m5),f,hyundai,2008,21,4
+TRAnS,cty,YEAR,ModEl,DrV,DISpL,cLAsS,hwy,MaNUfaCtUrer
+manual(m5),21,2008,camry,f,2.4,midsize,31,toyota
+auto(l5),16,2008,toyota tacoma 4wd,4,4,pickup,20,toyota
+manual(m5),15,1999,4runner 4wd,4,2.7,suv,20,toyota
+manual(m5),19,1999,tiburon,f,2,subcompact,29,hyundai
+manual(m5),18,1999,sonata,f,2.4,midsize,27,hyundai
+auto(l4),11,1999,durango 4wd,4,5.9,suv,15,dodge
+auto(l5),14,2008,pathfinder 4wd,4,4,suv,20,nissan
+manual(m6),21,2008,passat,f,2,midsize,29,volkswagen
+auto(l4),24,1999,corolla,f,1.8,compact,33,toyota
+auto(l4),13,1999,mountaineer 4wd,4,5,suv,17,mercury
+auto(l5),19,2008,sonata,f,3.3,midsize,28,hyundai
+auto(l4),11,1999,k1500 tahoe 4wd,4,5.7,suv,15,chevrolet
+auto(l4),11,1999,f150 pickup 4wd,4,5.4,pickup,15,ford
+auto(l4),19,1999,gti,f,2,compact,26,volkswagen
+manual(m6),20,2008,a4,f,2,compact,31,audi
+manual(m5),17,2008,tiburon,f,2.7,subcompact,24,hyundai
+auto(l4),13,1999,dakota pickup 4wd,4,3.9,pickup,17,dodge
+manual(m5),33,1999,jetta,f,1.9,compact,44,volkswagen
+auto(l4),22,2008,malibu,f,2.4,midsize,30,chevrolet
+auto(l4),18,2008,grand prix,f,3.8,midsize,28,pontiac

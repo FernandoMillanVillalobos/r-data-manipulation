@@ -1,21 +1,21 @@
-TrANs,Year,CLasS,CTY,DRV,moDel,fl,dispL,CYL
-auto(l4),1999,suv,15,4,4runner 4wd,r,3.4,6
-auto(l5),2008,midsize,19,f,sonata,r,3.3,6
-auto(l4),1999,compact,19,f,jetta,r,2,4
-auto(l4),1999,suv,11,4,land cruiser wagon 4wd,r,4.7,8
-auto(l4),1999,compact,18,f,camry solara,r,3,6
-manual(m5),2008,compact,21,f,jetta,r,2.5,5
-auto(l4),1999,suv,11,4,range rover,p,4,8
-auto(l5),2008,suv,14,4,4runner 4wd,r,4.7,8
-auto(av),2008,compact,18,f,a4,p,3.1,6
-manual(m6),2008,subcompact,16,f,tiburon,r,2.7,6
-manual(m6),2008,pickup,9,4,ram 1500 pickup 4wd,e,4.7,8
-auto(l4),1999,pickup,14,4,f150 pickup 4wd,r,4.2,6
-auto(l4),1999,midsize,16,f,grand prix,p,3.8,6
-auto(l4),1999,compact,21,f,camry solara,r,2.2,4
-auto(l4),2008,suv,11,4,k1500 tahoe 4wd,e,5.3,8
-manual(m5),1999,pickup,11,4,dakota pickup 4wd,r,5.2,8
-auto(l5),2008,pickup,13,4,ram 1500 pickup 4wd,r,4.7,8
-manual(m5),2008,subcompact,15,r,mustang,r,4.6,8
-auto(l4),1999,subcompact,18,r,mustang,r,3.8,6
-auto(s6),2008,midsize,17,f,passat,p,3.6,6
+YeAR,fl
+1999,r
+2008,r
+1999,r
+1999,r
+2008,r
+2008,r
+1999,r
+2008,r
+1999,r
+2008,r
+2008,r
+1999,p
+2008,p
+2008,r
+2008,p
+1999,p
+2008,e
+2008,r
+1999,p
+2008,r

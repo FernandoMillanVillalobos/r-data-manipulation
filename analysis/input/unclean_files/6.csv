@@ -1,21 +1,21 @@
-TraNS,Cyl,DrV,hWy,yeaR,diSPl,ModEL,Fl,CtY,cLASs
-auto(l4),6,f,26,1999,3.8,grand prix,p,16,midsize
-auto(l4),6,f,24,2008,2.7,tiburon,r,17,subcompact
-auto(s6),5,f,29,2008,2.5,jetta,r,21,compact
-auto(l4),6,r,25,1999,3.8,mustang,r,18,subcompact
-auto(l4),4,f,27,1999,2.4,altima,r,19,compact
-manual(m6),8,4,16,2008,4.7,ram 1500 pickup 4wd,r,12,pickup
-auto(l4),8,4,15,1999,5.4,f150 pickup 4wd,r,11,pickup
-auto(l5),6,f,28,2008,3.3,sonata,r,19,midsize
-auto(l5),4,f,29,1999,1.8,a4,p,18,compact
-manual(m5),6,4,17,1999,4.2,f150 pickup 4wd,r,14,pickup
-auto(l4),8,r,17,1999,5.7,c1500 suburban 2wd,r,13,suv
-auto(l5),6,r,24,2008,4,mustang,r,16,subcompact
-auto(l5),8,4,17,2008,4.7,durango 4wd,r,13,suv
-manual(m5),6,4,25,1999,2.8,a4 quattro,p,17,compact
-auto(l3),4,f,24,1999,2.4,caravan 2wd,r,18,minivan
-manual(m5),4,f,29,1999,2,new beetle,r,21,subcompact
-auto(l4),6,f,26,1999,3,camry,r,18,midsize
-auto(l6),8,4,19,2008,4.6,mountaineer 4wd,r,13,suv
-auto(l5),6,4,25,1999,2.8,a4 quattro,p,15,compact
-manual(m6),4,f,31,2008,2,a4,p,20,compact
+trANs,fl,cTY,CYL,dISpL,mANuFaCtuRer,DrV,modEL,yEar,hWy,clAss
+manual(m5),r,18,6,3,toyota,f,camry,1999,26,midsize
+auto(l4),r,13,8,5,ford,4,explorer 4wd,1999,17,suv
+auto(l4),r,21,4,2.4,hyundai,f,sonata,2008,30,midsize
+auto(l4),e,11,6,3.3,dodge,f,caravan 2wd,2008,17,minivan
+manual(m5),r,15,8,4.6,ford,r,mustang,2008,23,subcompact
+manual(m5),r,15,6,3.4,toyota,4,4runner 4wd,1999,17,suv
+manual(m5),r,14,6,3.9,dodge,4,dakota pickup 4wd,1999,17,pickup
+auto(l5),r,21,4,2.4,toyota,f,camry,2008,31,midsize
+manual(m6),e,9,8,4.7,dodge,4,ram 1500 pickup 4wd,2008,12,pickup
+auto(s4),p,20,4,2.5,subaru,4,impreza awd,2008,25,compact
+auto(l4),r,24,4,1.6,honda,f,civic,1999,32,subcompact
+auto(l4),r,18,6,3.8,pontiac,f,grand prix,2008,28,midsize
+manual(m5),r,11,8,5.2,dodge,4,dakota pickup 4wd,1999,17,pickup
+auto(l5),r,13,8,4.7,dodge,4,ram 1500 pickup 4wd,2008,17,pickup
+auto(l4),r,15,6,4,jeep,4,grand cherokee 4wd,1999,20,suv
+auto(s6),p,19,4,2,audi,4,a4 quattro,2008,27,compact
+auto(l4),r,15,6,3.4,toyota,4,4runner 4wd,1999,19,suv
+auto(l4),r,14,6,3.7,dodge,4,dakota pickup 4wd,2008,18,pickup
+manual(m5),r,11,8,5.2,dodge,4,ram 1500 pickup 4wd,1999,16,pickup
+manual(m5),r,20,4,2,hyundai,f,tiburon,2008,28,subcompact

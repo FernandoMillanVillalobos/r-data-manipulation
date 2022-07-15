@@ -1,21 +1,21 @@
-ManufAcTurER
-jeep
-nissan
-volkswagen
-hyundai
-audi
-subaru
-volkswagen
-dodge
-ford
-volkswagen
-ford
-subaru
-ford
-hyundai
-toyota
-chevrolet
-dodge
-dodge
-dodge
-chevrolet
+mANUFActurer,CTy,MODEL,Hwy,DisPl,CLaSS,CYL,Fl,yEAR,traNS
+dodge,13,durango 4wd,17,3.9,suv,6,r,1999,auto(l4)
+toyota,26,corolla,35,1.8,compact,4,r,2008,auto(l4)
+hyundai,21,sonata,30,2.4,midsize,4,r,2008,auto(l4)
+hyundai,17,tiburon,24,2.7,subcompact,6,r,2008,auto(l4)
+jeep,9,grand cherokee 4wd,12,4.7,suv,8,e,2008,auto(l5)
+toyota,21,camry solara,31,2.4,compact,4,r,2008,manual(m5)
+dodge,13,durango 4wd,17,4.7,suv,8,r,2008,auto(l5)
+hyundai,18,sonata,26,2.5,midsize,6,r,1999,manual(m5)
+mercury,13,mountaineer 4wd,17,5,suv,8,r,1999,auto(l4)
+dodge,14,dakota pickup 4wd,19,4.7,pickup,8,r,2008,auto(l5)
+nissan,14,pathfinder 4wd,20,4,suv,6,p,2008,auto(l5)
+toyota,18,camry,26,3,midsize,6,r,1999,manual(m5)
+dodge,12,ram 1500 pickup 4wd,16,4.7,pickup,8,r,2008,manual(m6)
+chevrolet,14,c1500 suburban 2wd,20,5.3,suv,8,r,2008,auto(l4)
+dodge,9,ram 1500 pickup 4wd,12,4.7,pickup,8,e,2008,auto(l5)
+toyota,16,4runner 4wd,20,4,suv,6,r,2008,auto(l5)
+nissan,21,altima,29,2.4,compact,4,r,1999,manual(m5)
+jeep,11,grand cherokee 4wd,14,6.1,suv,8,p,2008,auto(l5)
+ford,18,mustang,25,3.8,subcompact,6,r,1999,auto(l4)
+subaru,21,impreza awd,26,2.2,subcompact,4,r,1999,auto(l4)

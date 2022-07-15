@@ -1,21 +1,21 @@
 manufacturer,model,displ,year,cyl,trans,drv,cty,hwy,fl,class
-toyota,toyota tacoma 4wd,2.7,2008,4,manual(m5),4,17,22,r,pickup
-dodge,ram 1500 pickup 4wd,5.2,1999,8,manual(m5),4,11,16,r,pickup
-volkswagen,new beetle,2.5,2008,5,auto(s6),f,20,29,r,subcompact
-chevrolet,c1500 suburban 2wd,5.3,2008,8,auto(l4),r,14,20,r,suv
-audi,a4,1.8,1999,4,manual(m5),f,21,29,p,compact
-dodge,dakota pickup 4wd,4.7,2008,8,auto(l5),4,9,12,e,pickup
-chevrolet,malibu,2.4,2008,4,auto(l4),f,22,30,r,midsize
-toyota,4runner 4wd,2.7,1999,4,manual(m5),4,15,20,r,suv
-toyota,toyota tacoma 4wd,3.4,1999,6,manual(m5),4,15,17,r,pickup
-mercury,mountaineer 4wd,4.6,2008,8,auto(l6),4,13,19,r,suv
-chevrolet,corvette,5.7,1999,8,auto(l4),r,15,23,p,2seater
-nissan,altima,2.5,2008,4,manual(m6),f,23,32,r,midsize
-volkswagen,passat,2.8,1999,6,manual(m5),f,18,26,p,midsize
-toyota,camry,3,1999,6,auto(l4),f,18,26,r,midsize
-hyundai,sonata,2.4,2008,4,auto(l4),f,21,30,r,midsize
-dodge,ram 1500 pickup 4wd,4.7,2008,8,auto(l5),4,9,12,e,pickup
-honda,civic,1.8,2008,4,manual(m5),f,26,34,r,subcompact
-pontiac,grand prix,3.1,1999,6,auto(l4),f,18,26,r,midsize
+toyota,camry solara,2.4,2008,4,auto(s5),f,22,31,r,compact
+chevrolet,corvette,7,2008,8,manual(m6),r,15,24,p,2seater
+volkswagen,jetta,2.8,1999,6,auto(l4),f,16,23,r,compact
+toyota,camry,3,1999,6,manual(m5),f,18,26,r,midsize
+subaru,forester awd,2.5,2008,4,auto(l4),4,18,23,p,suv
+jeep,grand cherokee 4wd,4.7,2008,8,auto(l5),4,9,12,e,suv
+toyota,camry solara,2.2,1999,4,auto(l4),f,21,27,r,compact
+toyota,camry solara,3,1999,6,auto(l4),f,18,26,r,compact
 volkswagen,jetta,2,1999,4,auto(l4),f,19,26,r,compact
-chevrolet,corvette,5.7,1999,8,manual(m6),r,16,26,p,2seater
+dodge,caravan 2wd,4,2008,6,auto(l6),f,16,23,r,minivan
+hyundai,sonata,2.4,1999,4,manual(m5),f,18,27,r,midsize
+audi,a4,2,2008,4,auto(av),f,21,30,p,compact
+ford,explorer 4wd,4,2008,6,auto(l5),4,13,19,r,suv
+hyundai,sonata,2.5,1999,6,auto(l4),f,18,26,r,midsize
+dodge,caravan 2wd,3.3,1999,6,auto(l4),f,16,22,r,minivan
+audi,a4 quattro,2,2008,4,manual(m6),4,20,28,p,compact
+toyota,4runner 4wd,3.4,1999,6,auto(l4),4,15,19,r,suv
+ford,mustang,4.6,2008,8,auto(l5),r,15,22,r,subcompact
+dodge,caravan 2wd,2.4,1999,4,auto(l3),f,18,24,r,minivan
+toyota,camry solara,2.2,1999,4,manual(m5),f,21,29,r,compact

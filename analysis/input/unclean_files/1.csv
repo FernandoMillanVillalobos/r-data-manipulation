@@ -1,21 +1,21 @@
-HWY,TrAns,Fl,Class,Model,cyl,DRv
-30,auto(l4),r,midsize,sonata,4,f
-19,auto(l5),r,suv,explorer 4wd,6,4
-19,auto(l4),r,suv,k1500 tahoe 4wd,8,4
-12,manual(m6),e,pickup,ram 1500 pickup 4wd,8,4
-15,auto(l4),r,pickup,f150 pickup 4wd,8,4
-26,manual(m6),p,2seater,corvette,8,r
-26,auto(l4),r,midsize,grand prix,6,f
-34,manual(m5),r,subcompact,civic,4,f
-20,auto(l5),r,suv,4runner 4wd,6,4
-16,auto(l4),r,pickup,f150 pickup 4wd,8,4
-17,manual(m5),r,pickup,toyota tacoma 4wd,6,4
-17,auto(l4),r,suv,expedition 2wd,8,r
-31,auto(l5),r,midsize,camry,4,f
-17,auto(l4),r,suv,navigator 2wd,8,r
-29,manual(m6),p,midsize,passat,4,f
-29,auto(l5),p,compact,a4,4,f
-27,auto(l4),r,midsize,grand prix,6,f
-15,auto(l4),e,suv,c1500 suburban 2wd,8,r
-26,manual(m5),r,subcompact,mustang,6,r
-24,auto(l4),r,minivan,caravan 2wd,6,f
+TRaNS,mODeL,yEAr,fL,disPL,CLaSs,cYl
+manual(m5),impreza awd,1999,r,2.2,subcompact,4
+manual(m5),tiburon,2008,r,2,subcompact,4
+manual(m6),a4 quattro,2008,p,2,compact,4
+auto(l5),a4,1999,p,2.8,compact,6
+manual(m6),ram 1500 pickup 4wd,2008,e,4.7,pickup,8
+manual(m5),mustang,1999,r,3.8,subcompact,6
+manual(m5),jetta,2008,r,2.5,compact,5
+auto(l4),caravan 2wd,1999,r,3.8,minivan,6
+manual(m5),civic,1999,r,1.6,subcompact,4
+auto(s6),range rover,2008,r,4.2,suv,8
+auto(l4),camry solara,1999,r,2.2,compact,4
+manual(m5),a4,1999,p,1.8,compact,4
+auto(l4),expedition 2wd,1999,r,5.4,suv,8
+auto(l3),corolla,1999,r,1.8,compact,4
+auto(l4),caravan 2wd,1999,r,3.3,minivan,6
+auto(l4),c1500 suburban 2wd,2008,r,6,suv,8
+manual(m5),new beetle,2008,r,2.5,subcompact,5
+auto(l4),c1500 suburban 2wd,1999,r,5.7,suv,8
+auto(l4),impreza awd,1999,r,2.2,subcompact,4
+auto(l5),civic,2008,c,1.8,subcompact,4
