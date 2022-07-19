@@ -140,6 +140,7 @@ if (Sys.getenv("RSTUDIO") == "1") {
 cat("
 library(rstudioapi)
 library(tidyverse)
+library(data.table)
 library(tidylog)
 library(jsonlite)
 library(lintr)
@@ -160,6 +161,7 @@ library(vcdExtra)
 library(psych)
 library(Hmisc)
 library(skimr)
+library(gapminder)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -378,13 +380,13 @@ read_csv("input/mpg_uppercase.csv", show_col_types = FALSE, name_repair = ~ make
 read_csv("input/mpg_uppercase.csv", show_col_types = FALSE, name_repair = make_clean_names, col_select = c(manufacturer, model)) %>% 
   glimpse()
 ```
-You don’t always read just one file into R. It is not uncommon for your data to be scattered in hundreds or thousands of files. Of course, you don’t want to read these files into R manually. So you need an automatic method for reading in files. Before we can read the files into R, we need to create a character vector of the file paths. You have several options to create such a vector. You can use the R base function `list.files`, which returns character vectors of the names of files in a directory or you use the function `dir_ls` from the _fs_ package. The other option is to use the `dir_ls` function from the _fs_ package. _fs_ provides a cross-platform interface for accessing files on your hard disk. It supports all file operations (deleting, creating files, moving files, etc.).
+You don"t always read just one file into R. It is not uncommon for your data to be scattered in hundreds or thousands of files. Of course, you don"t want to read these files into R manually. So you need an automatic method for reading in files. Before we can read the files into R, we need to create a character vector of the file paths. You have several options to create such a vector. You can use the R base function `list.files`, which returns character vectors of the names of files in a directory or you use the function `dir_ls` from the _fs_ package. The other option is to use the `dir_ls` function from the _fs_ package. _fs_ provides a cross-platform interface for accessing files on your hard disk. It supports all file operations (deleting, creating files, moving files, etc.).
 
 Now that we know the file paths, we can load the files into R. The tidyverse way to do this is to use the `map_dfr` function from the _purrr_ package. `map_dfr` loops through all the file paths and binds the data frames into a single data frame. The `.x` in the following code stands for the file name. To output the actual csv files and not the filenames, we need to put `.x` (the path) in a `read_*` function. In this example we are working with CSV files. The trick works the same for all rectangular file formats. Another approach is to use the `read_csv` function directly by putting the character vector of the file names directly into `read_csv`.
 
 Sometimes your files are deeply nested. In that case, we need to search through each folder recursively. If you try to load all csv files from the nested_folders folder, you would get an empty vector. This is because `dir_ls` does not look in the nested folders, but only in the parent folder. To make `dir_ls` search through the folders recursively, you need to set the `recurse` argument to `TRUE`. 
 
-You don’t always need all the files in your directory and need to remove some files from the list of file paths. A good way to do this is to use the `str_detect` function from the _stringr_ package. The function returns logical values. To change the actual character vector, we need to add these logical values to the character vector itself. With the `negate` argument you can find only the files that do not match the pattern.
+You don"t always need all the files in your directory and need to remove some files from the list of file paths. A good way to do this is to use the `str_detect` function from the _stringr_ package. The function returns logical values. To change the actual character vector, we need to add these logical values to the character vector itself. With the `negate` argument you can find only the files that do not match the pattern.
 
 ```{r}
 horas_sol <- read_csv("input/SS_STAID001395.txt", skip = 19) |> # los datos empiezan en la linea 20
@@ -510,12 +512,12 @@ The `write_csv` function writes tabular data to an ASCII file in CSV format. Eac
 
 ### The magic of rio
 
-"The aim of **rio** is to make data file I/O [import/output] in R as easy as possible by implementing three simple functions in Swiss-army knife style," according to the project's GitHub page. Those functions are `import()`, `export()`, and `convert()`. So, the rio package has just one function to read in many different types of files: `import()`. Once you've analyzed your data, if you want to save the results as a CSV, Excel spreadsheet, or other format, rio's `export()` function can handle that. You can use R's `download.file` function with the syntax `download.file("url", "destinationFileName.csv")` to download files directly from the web. It's possible rio will ask you to re-download the file in binary format, in which case you'll need to run `download.file(“http://bit.ly/BostonSnowfallCSV”, “BostonWinterSnowfalls.csv”, mode=‘wb’`).
+"The aim of **rio** is to make data file I/O [import/output] in R as easy as possible by implementing three simple functions in Swiss-army knife style," according to the project's GitHub page. Those functions are `import()`, `export()`, and `convert()`. So, the rio package has just one function to read in many different types of files: `import()`. Once you've analyzed your data, if you want to save the results as a CSV, Excel spreadsheet, or other format, rio's `export()` function can handle that. You can use R's `download.file` function with the syntax `download.file("url", "destinationFileName.csv")` to download files directly from the web. It's possible rio will ask you to re-download the file in binary format, in which case you'll need to run `download.file(“http://bit.ly/BostonSnowfallCSV”, “BostonWinterSnowfalls.csv”, mode=‘wb"`).
 
 ```{r}
 # getting data from the web with R-built-in
 download.file("http://bit.ly/BostonSnowfallCSV", "input/BostonWinterSnowfalls.csv")
-# download.file(“http://bit.ly/BostonSnowfallCSV”, “BostonWinterSnowfalls.csv”, mode=‘wb’)
+# download.file(“http://bit.ly/BostonSnowfallCSV”, “BostonWinterSnowfalls.csv”, mode=‘wb")
 
 # import data with rio locally
 snowdata2 <- rio::import("input/BostonWinterSnowfalls.csv")
@@ -609,6 +611,203 @@ If you are working with large data sets, speed may become important to you when 
 
 The **feather** package saves in a binary format that can be read either into R or Python. And, the **fst** package's `read.fst()` and `write.fst()` offer fast saving and loading of R data frame objects -- plus the option of file compression.
 
+# Reshaping data
+
+## Base-R
+
+Often the values required for a particular operation can be found in a data frame, but they are not organized in the appropriate way. As a simple example, data for multiple groups are often stored in spreadsheets or data summaries as columns, with a separate column for each group. Most of the modeling and graphics functions in R will not be able to work with such data; they expect the values to be in a single column with an additional column that specifies the group from which the data arose. The `stack` function can reorganize datasets to have this property. If there were other variables in the data frame that did not need to be converted to this form, the `select=` argument to stack allows you to specify the variables that should be used, similar to the same argument to the `subset` function. The `unstack` function will reorganize stacked data back to the one column per group form. To use `unstack`, a formula must be provided to explain the roles of the variables to be unstacked.
+
+For more complex reorganizations, the concept of “wide” versus “long” datasets is often helpful. When there are multiple occurrences of values for a single observation, a data frame is said to be long if each occurrence is a separate row in the data frame; if all of the occurrences of values for a given observation are in the same row, then the dataset is said to be wide. The `reshape` function converts datasets between these two forms. Perhaps the most common use of reshape involves repeated measures analyses, where the same variable is recorded for each observation at several different times.
+
+To use reshape to convert the dataset to wide format, we need to provide five arguments. The first argument is the data frame to be reshaped. The next three arguments provide the names of the columns that will be involved in the reshaping. The idvar= argument provides the names of the variables that define the experimental unit which was repeatedly measured. In this case, it"s the subj variable. The v.names= argument tells reshape which variables in the long format will be used to create the multiple variables in the wide format. In this example, we want both x and y be to be expanded to multiple variables, so we"d specify a vector with both those names. The timevar= variable tells which variable identifies the sequence number that will be used to create the multiple versions of the v.names variables; in this case it will be time. Finally, the direction= argument accepts values of "wide" or "long", depending on which transformation is to be performed.
+
+The names x.1, y.1, etc. were formed by joining together the variable names of the variables specified in the `v.names=` argument with the values of the `timevar=` variable. Any variables not specified in the `v.names=` argument are assumed to be constant for all observations with the same values as the `idvar=` variables, and a single copy of such variables will be included in the output data frame. Only the variables whose names appear in the `v.names=` argument will be converted into multiple variables, so if any variables that are in the data frame but not in the `v.names=` argument are not constant, reshape will print a warning message, and use the first value of such variables when converting to wide format. To prevent variables from being transferred to the output data frame, the drop= argument can be used to pass a vector of variable names to be ignored in the conversion.
+
+The information about the reshaping procedure is stored as attributes in converted data frames, so once a data frame has been converted with reshape, it can be changed to its previous format by passing just the data frame with no additional arguments to `reshape`.
+
+Since reshape can handle multiple sets of variables, the `varying=` argument should be passed a list containing vectors with the names of the different sets of variables that should be mapped to a single variable in the long dataset. The automatically generated variable id is simply a numeric index corresponding to the type variable; using `idvar="type"` will suppress its creation. The automatically generated variable time defaults to a set of consecutive integers; providing more meaningful values through the `times=` argument will label the values properly. Finally, the name of the column representing the values (which defaults to the first name in the varying= argument) can be set to a more meaningful name with the v.names= argument.
+
+The _reshape_ package uses the concept of “melting” a dataset (through the melt function) into a data frame which contains separate columns for each id variable, a variable column containing the name of each measured variable, and a final column named value with the variable"s value. It may be noticed that this melting operation is essentially a “wide-to-long” reshaping of the data.
+
+For long-to-wide conversions, recall that variables appearing to the left of the tilde in the formula passed to cast will appear in the columns of the output, while those on the right will appear in the rows.
+
+At the most basic level, two or more data frames can be combined by rows using `rbind`, or by columns using `cbind`. For `rbind`, the data frames must have the same number of columns; for `cbind`, the data frames must have the same number of rows. Vectors or matrices passed to `cbind` will be converted to data frames, so the mode of columns passed to `cbind` will be preserved. While `cbind` will demand that data frames and matrices are conformable (that is, they have the same number of rows), vectors passed to cbind will be recycled if the number of rows in the data frame or matrix is an even multiple of the length of the vector. It may be a good idea to use unique names when combining data frames in this way. An easy way to test is to pass the names of the two data frames to the `intersect` function. When using `rbind`, the names and classes of values to be joined must match, or a variety of errors may occur.
+
+Although the `rbind` function will demand that the names of the objects being combined agree, `cbind` does not do any such checking. To combine data frames based on the values of common variables, the `merge` function should be used. This function is designed to provide the same sort of functionality and behavior as the table joins provided by relational databases. Although merge is limited to operating on two data frames at a time, it can be called repeatedly to deal with more than two data frames. The default behavior of `merge` is to join together rows of the data frames based on the values of all of the variables (columns) that the data frames have in common. (In database terminology, this is known as a natural join.) When called without any other arguments, merge returns only those rows which had observations in both data frames.
+
+Although there were six unique values for a between the two data frames, only those rows with values of a in both data frames are represented in the output. To modify this, the `all=`, `all.x=`, and `all.y=` arguments can be used. Specifying `all=TRUE` will include all rows (full outer join, in database terminology), `all.x=TRUE` will include all rows from the first data frame (left outer join), and `all.y=TRUE` does the same for the second data frame (right outer join).
+
+To take more control over which variables are used to merge rows of the data frame, the `by=` argument can be used. You provide the `by=` argument with a vector of the name or names of the variables that should be used for the merge. If the merging variables have different names in the data frames to be merged, the `by.x=` and `by.y=` arguments can be used.
+
+```{r}
+mydata <- data.frame(grp1 = c(12, 15, 19, 22, 25), grp2 = c(18, 12, 42, 29, 44), grp3 = c(8, 17, 22, 19, 31))
+
+# reshaping data frame
+sdata <- stack(mydata)
+sdata
+
+# converting the the original form
+mydata <- unstack(sdata, values ~ ind)
+mydata
+
+# using reshape
+set.seed(17)
+obs <- data.frame(subj = rep(1:4, rep(3, 4)), time = rep(1:3), x = rnorm(12), y = rnorm(12))
+head(obs)
+
+# from long to wide
+wideobs <- reshape(obs, idvar = "subj", v.names = c("x", "y"), timevar = "time", direction = "wide")
+head(wideobs)
+
+# from wide to long
+obs <- reshape(wideobs)
+head(obs)
+
+# from wide to long (complex example)
+usp <- data.frame(type = rownames(USPersonalExpenditure), USPersonalExpenditure, row.names = NULL)
+head(usp)
+
+rr <- reshape(usp, varying = list(names(usp)[-1]), idvar = "type", times = seq(1940, 1960, by = 5), v.names = "expend", direction = "long")
+head(rr)
+
+# an alternative way of reshaping the usp data frame, without having to explicitly provide the values of the times
+rr1 <- reshape(usp, varying = names(usp)[-1], idvar = "type", split = list(regexp = "X1", include = TRUE), direction = "long")
+head(rr1)
+
+# using melt from reshape package (wide-to-long)
+musp = reshape::melt(usp)
+# or
+# reshape::cast(musp,variable + type ~ .)
+head(musp)
+
+# getting rid of "X" and changing type to numeric
+musp$variable <- as.numeric(sub("X", "", musp$variable))
+# renaming columns
+names(musp)[2:3] <- c("time", "expend")
+head(musp)
+
+# using cast from reshape package (long-to-wide)
+set.seed(999)
+obs2 <- data.frame(subj = rep(1:4, rep(3, 4)), time = rep(1:3), x = rnorm(12), y = rnorm(12))
+mobs <- reshape::melt(obs2)
+# reshape::cast(subj ~ variable + time, data = mobs)
+
+# combining data sets using cbind and rbind
+x <- data.frame(a = c("A", "B", "C"), x = c(12, 15, 19))
+y <- data.frame(a = c("D", "E", "F", "G"), x = c(19, 21, 14, 12))
+intersect(names(x), names(y))
+cbind(y, z = c(1, 2))
+
+# combining data sets based on the values of common variables
+x <- data.frame(a = c(1, 2, 4, 5, 6), x = c(9, 12, 14, 21, 8))
+y <- data.frame(a = c(1, 3, 4, 6), y = c(8, 14, 19, 2))
+merge(x, y)
+
+# outer join
+merge(x, y, all = TRUE)
+
+# left outer join
+merge(x, y, all.x = TRUE)
+
+# right outer join
+merge(x, y, all.y = TRUE)
+
+cities <- data.frame(city = c("New York", "Boston", "Juneau", "Anchorage", "San Diego", "Philadelphia", "Los Angeles", "Fairbanks", "Ann Arbor", "Seattle"), state.abb = c("NY", "MA", "AK", "AK", "CA", "PA", "CA", "AK", "MI", "WA"))
+states <- data.frame(state.abb = c("NY", "MA", "AK", "CA", "PA", "MI", "WA"), state = c("New York", "Massachusetts", "Alaska", "California", "Pennsylvania", "Michigan", "Washington"))
+
+merge(cities, states)
+```
+
+## Tidyverse
+
+There are three interrelated rules which make **a dataset tidy**: 1. Each variable must have its own column. 2. Each observation must have its own row. 3. Each value must have its own cell. These three rules are interrelated because it’s impossible to only satisfy two of the three: 1. Put each dataset in a tibble. 2. Put each variable in a column.
+
+- **Wide** form: every row corresponds to a unique *subject.*
+- **Long** form: every row corresponds to a unique *measurement.*
+
+![Tidy data set](input/img/reshaping-data.png)
+
+`pivot_longer()` "lengthens" data, increasing the number of rows and decreasing the number of columns. The inverse transformation is `pivot_wider()`. `pivot_longer()` is an updated approach to `gather()`, designed to be both simpler to use and to handle more use cases. We recommend you use `pivot_longer()` for new code; `gather()` isn't going away but is no longer under active development.
+
+`pivot_wider()` "widens" data, increasing the number of columns and decreasing the number of rows. The inverse transformation is `pivot_longer()`. `pivot_wider()` is an updated approach to `spread()`, designed to be both simpler to use and to handle more use cases. We recommend you use `pivot_wider()` for new code; `spread()` isn't going away but is no longer under active development.
+
+```{r}
+# wide to long
+# where column names are character data
+head(relig_income)
+relig_income %>%
+  pivot_longer(!religion, names_to = "income", values_to = "count")
+
+# columns have common prefix and missing missings are structural so should be dropped
+head(billboard)
+billboard %>%
+  pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    names_prefix = "wk",
+    values_to = "rank",
+    values_drop_na = TRUE
+  )
+
+# multiple variables stored in column names
+head(who)
+who %>% 
+  pivot_longer(
+cols = new_sp_m014:newrel_f65,
+names_to = c("diagnosis", "gender", "age"),
+names_pattern = "new_?(.*)_(.)(.*)",
+values_to = "count"
+)
+ 
+# multiple observations per row
+head(anscombe)
+anscombe %>% 
+  pivot_longer(everything(),
+ names_to = c(".value", "set"),
+ names_pattern = "(.)(.)"
+)
+
+# long to wide
+head(fish_encounters)
+fish_encounters %>% 
+  pivot_wider(names_from = station, values_from = seen)
+
+# filling in missing values
+fish_encounters %>%
+  pivot_wider(names_from = station, values_from = seen, values_fill = 0)
+
+# generating column names from multiple variables
+head(us_rent_income)
+us_rent_income %>% 
+  pivot_wider(names_from = variable, values_from = c(estimate, moe))
+
+# when there are multiple `names_from` or `values_from`, you can use use `names_sep` or `names_glue` to control the output variable names
+us_rent_income %>%
+  pivot_wider(
+    names_from = variable,
+    names_sep = ".",
+    values_from = c(estimate, moe)
+  )
+
+us_rent_income %>%
+ pivot_wider(
+    names_from = variable,
+    names_glue = "{variable}_{.value}",
+    values_from = c(estimate, moe)
+  )
+
+warpbreaks <- as_tibble(warpbreaks[c("wool", "tension", "breaks")])
+head(warpbreaks)
+warpbreaks %>%
+  pivot_wider(
+    names_from = wool,
+    values_from = breaks,
+    values_fn = mean
+  )
+```
+
+
+
 # Summarizing data sets
 
 ## Base-R
@@ -658,6 +857,157 @@ Hmisc::describe(snowdata)
 psych::describe(snowdata)
 skim(snowdata)
 ```
+# Subsetting and modifying data frames
+
+## Base-R
+
+For objects that contain more than one element (vectors, matrices, arrays, data frames, and lists), subscripting is used to access some or all of those elements. Besides the usual numeric subscripts, R allows the use of character or logical values for subscripting. Subscripting operations are very fast and efficient, and are often the most powerful tool for accessing and manipulating data in R.
+
+Like most computer languages, numeric subscripts can be used to access the elements of a vector, array, or list. The first element of an object has subscript 1; subscripts of 0 are silently ignored. In addition to a single number, a vector of subscripts (or, for example, a function call that returns a vector of subscripts) can be used to access multiple elements. The colon operator and the `seq` function are especially useful here. Negative subscripts in R extract all of the elements of an object except the ones specified in the negative subscript; thus, when using numeric subscripts, subscripts must be either all positive (or zero) or all negative (or zero).
+
+If a subscriptable object is named, a character string or vector of character strings can be used as a subscript. Negative character subscripts are not permitted; if you need to exclude elements based on their names, the `grep` function can be used.
+
+Logical values can be used to selectively access elements of a subscriptable object, provided the size of the logical object is the same as the object (or part of the object) that is being subscripted. Elements corresponding to TRUE values in the logical vector will be included, and objects corresponding to FALSE values will not. Logical subscripting provides a very powerful and simple way to perform tasks that might otherwise require loops. Like most operations in R, logical operators are vectorized; applying a logical subscript to a vector or an array will produce an object of the same size and shape as the original object. To find the indices of elements, R provides the `which` function, which accepts a logical vector, and returns __a vector containing the subscripts of the elements for which the logical vector was true__. Logical subscripts allow for modification of elements that meet a particular condition by using an appropriately subscripted object on the left-hand side of an assignment statement.
+
+Lists are the most general way to store a collection of objects in R, because there is no limitation on the mode of the objects that a list may hold. Although it hasn"t been explicitly stated, one rule of subscripting in R is that subscripting will always return an object of the same mode as the object being subscripted. For matrices and vectors, this is completely natural, and should never cause confusion. But for lists, there is a subtle distinction between part of a list, and the object which that part of the list represents.
+
+If the elements of the list are named, the actual contents of the elements can be accessed by separating the name of the list from the name of the element with a dollar sign ($). For interactive sessions, using the dollar sign notation is the natural way to perform operations on the elements of a list. For those situations where the dollar sign notation would be inappropriate (for example, accessing elements through their index or through a name stored in a character variable), R provides the double bracket subscript operator. Double brackets are not restricted to respect the mode of the object they are subscripting, and will extract the actual list element from the list.
+
+__The key thing to notice is that in this case, single brackets will always return a list containing the selected element(s), while double brackets will return the actual contents of selected list element.__
+
+Since data frames are a cross between a list and a matrix, it"s not surprising that both matrix and list subscripting techniques apply to data frames. When using logical subscripts with data frames containing missing values, it may be necessary to remove the missing values before the logical comparison is made, or unexpected results may occur. This situation is so common that R provides the `subset` function which accepts a data frame, matrix or vector, and a logical expression as its first two arguments, and which returns a similar object containing only those elements that meet the condition of the logical expression. It insures that missing values don"t get included, and, if its first argument is a data frame or matrix with named columns, it also resolves variable names inside the logical expression from the object passed as the first argument. A further convenience is offered by the `select=` argument which will extract only the specified columns from the data frame passed as the first argument. The argument to `select=` is a vector of integers or variable names which correspond to the columns that are to be extracted. Unlike most other functions in R, names passed through the `select=` argument can be either quoted or unquoted. To ignore columns, their name or index number can be preceded by a negative sign (-). Since the `select=` argument works by replacing variable names with their corresponding column indices, ranges of columns can be specified using variable names. The `subset` function will always return a new data frame, matrix or vector, so it is __not suited for modifying selected parts of a data frame__.
+
+```{r}
+# subsetting a list
+simple <- list(a = c("fred", "sam", "harry"), b = c(24, 17, 19, 22))
+mode(simple)
+simple[2]
+mode(simple[2])
+
+simple$b
+mean(simple$b)
+mean(simple[[2]])
+
+# single brackets return a list
+simple[1]
+# double brackets return the actual contents of selected list element
+simple[[1]]
+
+# subsetting a data frame
+# First, we check the order of the columns:
+data.frame(names(airquality))
+
+airquality[5, 4]    # The 5th element from the 4th column,
+                    # i.e. the same as airquality$Temp[5]
+airquality[5,]      # The 5th row of the data
+airquality[, 4]     # The 4th column of the data, like airquality$Temp
+airquality[[4]]     # The 4th column of the data, like airquality$Temp
+airquality[, c(2, 4, 6)] # The 2nd, 4th and 6th columns of the data
+airquality[, -2]    # All columns except the 2nd one
+
+airquality[, c("Temp", "Wind")] # The Temp and Wind columns
+
+age <- c(28, 48, 47, 71, 22, 80, 48, 30, 31)
+purchase <- c(20, 59, 2, 12, 22, 160, 34, 34, 29)
+bookstore <- data.frame(age, purchase)
+
+bookstore$age[2] <- 18
+# or
+bookstore[2, 1] <- 18
+
+# subsetting with logical values
+nums = c(12,9,8,14,7,16,3,2,9)
+nums > 10
+nums[nums > 10]
+
+which(nums > 10)
+# equal to
+seq(along = nums)[nums > 10]
+
+which.max(airquality$Temp)
+airquality[which.max(airquality$Temp),]
+airquality[airquality$Temp > 90, ]
+
+# knowing if all elements in a vector fulfill the condition
+all(airquality$Temp > 90)
+# knowing whether at least one element in a vector fulfill the condition
+any(airquality$Temp > 90)
+# finding how many elements that fulfill a condition
+sum(airquality$Temp > 90)
+
+# modifying elements through logical subscriptions
+nums[nums > 10] <- 0
+nums
+dd <- data.frame(a = c(5, 9, 12, 15, 17, 11), b = c(8, NA, 12, 10, NA, 15))
+
+dd[dd$b > 10, ]
+
+bookstore$visit_length <- c(5, 2, 20, 22, 12, 31, 9, 10, 11)
+bookstore
+
+# storing the TRUE or FALSE values in a new variable
+airquality$Hot <- airquality$Temp > 90
+airquality$Hot
+
+# filtering and creating a new variable
+temp_may <- airquality$Temp[airquality$Month == 5]
+temp_june <- airquality$Temp[airquality$Month == 6]
+
+# splitting vectors into lists
+temps <- split(airquality$Temp, airquality$Month)
+names(temps) <- c("May", "June", "July", "August", "September")
+temps
+temps$June
+
+# collapsing lists into vectors
+unlist(temps)
+
+# using subset
+subset(dd, b > 10)
+some <- subset(LifeCycleSavings, sr > 10, select = c(pop15, pop75))
+head(some)
+life1 <- subset(LifeCycleSavings, select = pop15:dpi)
+# or
+life1 <- subset(LifeCycleSavings, select = 1:3)
+head(life1)
+life2 <- subset(LifeCycleSavings, select = c(-pop15, -pop75))
+# or
+life2 <- subset(LifeCycleSavings, select = -c(2, 3))
+head(life2)
+```
+
+## Tidyverse
+
+Select certain rows based on a logical condition - _dplyr"s_ `filter()`. To check for one condition OR another condition, use the `|` symbol, which means or. You can get the number of rows in a data frame with `nrow()`.
+
+```{r}
+# using filter from dplyr
+filter(snowdata, "Boston" > 100)
+filter(snowdata, "Boston" < 20 | "Boston" > 100)
+snowdata[nrow(snowdata), ]
+
+```
+
+## data.table vs Tidyverse
+
+_data.table_ and the _tidyverse_ packages offer simpler solutions and speed up the workflow for the types of problems we are dealing with. Both can be used for the same tasks. You can learn one of them or both. The syntax used for data.table is often more concise and arguably more consistent than that in dplyr (it is in essence an extension of the `[i, j]` notation that we have already used for data frames). Second, it is fast and memory-efficient, which makes a huge difference if you are working with big data. On the other hand, many people prefer the syntax in dplyr and _tidyr_, which lends itself exceptionally well for usage with pipes. If you work with small or medium-sized datasets, the difference in performance between the two packages is negligible. _dplyr_ is also much better suited for working directly with databases, which is a huge selling point if your data already is in a database.
+
+_data.table_ relies heavily on the `[i, j]` notation that is used for data frames in R. It also adds a third element: `[i, j, by]`. Using this, R selects the rows indicated by i, the columns indicated by j and groups them by by. This makes it easy e.g. to compute grouped summaries. With the tidyverse packages you will instead use new functions with names like `filter` and `summarise` to perform operations on your data. These are typically combined using the pipe operator, `%>%`, which makes the code flow nicely from left to right.
+
+_data.table_ syntax, as it only works on _data.table_ objects. __Luckily, _dplyr_ works perfectly when used on data.table objects__.
+
+```{r}
+aq <- as.data.table(airquality)
+
+# modifying a variable
+# data.table
+aq[, Wind := Wind * 0.44704]
+# dplyr
+aq %>% mutate(Wind = Wind * 0.44704) -> aq
+
+
+```
+
 
 # Linting
 
@@ -673,3 +1023,5 @@ The code in this RMarkdown is linted with the [lintr package](https://github.com
 # if you have additional scripts and want them to be linted too, add them here
 # lintr::lint("scripts/my_script.R")
 ```
+musp$variable = as.numeric(sub("X","",musp$variable))
+names(musp)[2:3] = c("time","expend")
