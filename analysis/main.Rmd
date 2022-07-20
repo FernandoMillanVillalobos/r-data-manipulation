@@ -295,7 +295,6 @@ cat(file = ff, "New York, NY 66,834.6
 city <- read.fwf(ff, widths = c(18, -19, 8), as.is = TRUE)
 city
 ```
-
 ### Exporting data
 
 R can also export R data objects (usually data frames and matrices) as text files. To export data to a text file, use the `write.table` function.There are wrapper functions for `write.table` that call `write.table` with different defaults. These are useful if you want to create a file of comma-separated values.
@@ -408,8 +407,7 @@ mad <- path %>%
   )
 head(mad)
 
-# importing and reading several .xlsx files at once
-# without merging
+# importing and reading several .xlsx files at once without merging
 dir_ls("input", regexp = "xlsx") %>%
   map(readxl::read_excel)
 
@@ -543,7 +541,7 @@ design.tokens2 <- htmltab("https://designsystem.digital.gov/design-tokens/", whi
 # installing packages from GitHub with pacman
 pacman::p_load_gh("smach/rmiscutils")
 
-# changing those character strings that should be numbers back into numbersC
+# changing those character strings that should be numbers back into numbers
 citytable$PopEst2021 <- number_with_commas(citytable$`2021estimate`)
 citytable$Census2020 <- readr::parse_number(citytable$`2020census`)
 
@@ -806,7 +804,206 @@ warpbreaks %>%
   )
 ```
 
+Existen otras tres funciones que son muy útiles para la manipulación de datos: `separate()`, que sirve para asegurar una columna en varias nuevas; `case_when()`, que sirve para establecer condionales y es similar a `ifelse()` y `complete()` que sirve para completar una variable o una combinación de variables.
 
+Para mostrar la primera función convertimos la fecha en tres columnas: año (yr), mes (mo) y día (dy), cuyos elementos están separados por “-“. Por ello, es necesario indicar la columna afectada, los nombres de las nuevas columnas y el símbolo separador. La función `mutate_all()` aplica a todas las columnas otra función, en este caso, `as.numeric()` para convertir todas en numéricas.
+
+En lugar de encapsular y encadenar `ifelse()`, podemos usar la función `case_when()`, en la que empleamos fórmulas en dos tiempos: por un lado la condición; por otro, la acción cuando se cumpla esa condición.
+
+Nuestro conjunto de datos contiene datos diarios desde el 1 de enero de 1980 hasta el 31 de diciembre de 2015. Así que únicamente debemos crear un vector con fechas de este periodo. En la función `complete()` indicamos la columna que queremos completar y le asignamos el vector entero de fechas. El resultado es un nuevo `data.frame` con todas las fechas, rellenando el resto de columnas con NA.
+
+```{r}
+# ta_vigo <- read_csv( "input/TG_STAID001395.txt", skip = 20)
+# head(ta_vigo)
+# 
+# ta_vigo <- mutate(ta_vigo, DATE = lubridate::ymd(DATE), TG = ifelse(TG == -9999, NA, TG / 10)) %>%
+#   filter(DATE >= "1980-01-01", DATE <= "2015-12-31") %>%
+#   select(-STAID:-SOUID, -Q_TG) %>%
+#   rename(date = DATE)
+# head(ta_vigo)
+# 
+# horas_sol <- read_csv("input/SS_STAID001395.txt", skip = 19)
+# horas_sol <- mutate(horas_sol, DATE = lubridate::ymd(DATE), SS = ifelse(SS == -9999, NA, SS / 10), month = month(DATE), year = year(DATE))
+# horas_sol <- rename(horas_sol, date = DATE, sunhours = SS)
+# horas_sol
+# data_vigo <- left_join (ta_vigo, horas_sol, by = "date" )
+# data_vigo
+# rio::export(data_vigo, file = "data_vigo.csv")
+
+# using separate() 
+time_df <- select(data_vigo, date) %>%
+  separate(date, c("yr", "mo", "dy"), sep = "-") %>%
+  mutate_all(as.numeric)
+head(time_df)
+
+# using case_when()
+time_df <- mutate(time_df, season = case_when(
+  mo %in% c(12, 1:2) ~ "invierno",
+  mo %in% 3:5 ~ "primavera",
+  mo %in% 6:8 ~ "verano",
+  mo %in% 9:11 ~ "otoño"
+))
+
+# preparing the data
+data_vigo <- gather(data_vigo, Variable, Valor, TG:sunhours)
+data_vigo_subset <- filter(data_vigo, Variable == "TG") %>%
+  slice(sample(nrow(data_vigo), 10000)) %>%
+  arrange(date)
+head(data_vigo_subset)
+date_ts <- seq(lubridate::ymd("1980-01-01"), lubridate::ymd("2015-12-31"), "day")
+
+# using complete()
+data_vigo_subset <- complete(data_vigo_subset, date = date_ts)
+head(data_vigo_subset)
+```
+## Packages
+
+Sometimes it makes sense to spread an observation over multiple rows (long format), and sometimes it makes more sense to spread a variable across multiple columns (wide format). Some analyses require long data, whereas others require wide data.
+
+When going from a __long format to a wide format__, you choose columns to group the observations by (in the _gapminder_ case: `country` and maybe also `continent`), columns to take values names from (`lifeExp`, `pop` and `gdpPercap`), and columns to create variable names from (year). In _data.table_, the transformation from long to wide is done using the `dcast` function.
+
+In _data.table_, __wide-to-long__ formatting is done using `melt`.
+
+```{r}
+gm <- as.data.table(gapminder)
+head(gm)
+
+# from long to wide
+gmw <- dcast(gm, country + continent ~ year, value.var = c("pop", "lifeExp", "gdpPercap"))
+head(gmw)
+
+# wide-to-long (not the best approach!)
+gm <- melt(gmw, id.vars = c("country", "continent"), measure.vars = 2:37)
+head(gm)
+
+# splitting columns and casting
+gm[, c("variable", "year") := tstrsplit(variable, "_", fixed = TRUE)]
+gm <- dcast(gm, country + year ~ variable, value.var = c("value"))
+head(gm)
+
+# merging columns
+aq <- as.data.table(airquality)
+head(aq)
+
+# creating a new column Date and mergin Month and Day into it (date format)
+aq[, Date := as.Date(paste(1973, aq$Month, aq$Day, sep = "-"))]
+head(aq)
+```
+It is common that data is spread over multiple tables. Consequently, it is important to be able to merge data from different tables. The simplest types of merges are binds, which can be used when you have two tables where either the rows or the columns match each other exactly.
+
+An operation that combines columns from two tables is called a __join__. There are two main types of joins: __inner joins__ and __outer joins__.
+
+- __Inner joins__: create a table containing all observations for which the key appeared in both tables. So if we perform an inner join on the `rev_data` and `weather_data` tables using `DATE` as the key, it won’t contain data for the days that are missing from either the revenue table or the weather table. 
+
+In contrast, outer joins create a table retaining rows, even if there is no match in the other table. There are three types of outer joins:
+
+- __Left join__: retains all rows from the first table. In the revenue example, this means all dates present in rev_data. 
+- __Right join__: retains all rows from the second table. In the revenue example, this means all dates present in weather_data. 
+- __Full join__: retains all rows present in at least one of the tables. In the revenue example, this means all dates present in at least one of `rev_data` and `weather_data`.
+
+__Semijoins__ and __antijoins__ are similar to joins, but work on observations rather than variables. That is, they are used for filtering one table using data from another table:
+
+- __Semijoin__: retains all observations in the first table that have a match in the second table. 
+- __Antijoin__: retains all observations in the first table that do not have a match in the second table.
+
+The same thing can be achieved using the filtering techniques, but semijoins and antijoins are simpler to use when the filtering relies on conditions from another table.
+
+```{r}
+# preparing the data
+rev_data <- read.csv("input/sales-rev.csv", sep = ";")
+weather_data <- read.csv("input/sales-weather.csv", sep = ";")
+
+rev_data <- as.data.table(rev_data)
+rev_data$DATE <- as.Date(rev_data$DATE)
+weather_data <- as.data.table(weather_data)
+weather_data$DATE <- as.Date(weather_data$DATE)
+
+rev_jan <- rev_data[DATE %between% c("2020-01-01", "2020-01-31"), ]
+rev_feb <- rev_data[DATE %between% c("2020-02-01", "2020-02-29"), ]
+weather_jan <- weather_data[DATE %between% c("2020-01-01", "2020-01-31"), ]
+
+str(rev_jan) 
+str(rev_feb) 
+str(weather_jan)
+
+# with Base-R
+# Join columns of datasets that # have the same rows: 
+cbind(rev_jan, weather_jan)
+
+# Join rows of datasets that have # the same columns: 
+rbind(rev_jan, rev_feb)
+
+# with dplyr
+# Join columns of datasets that # have the same rows: 
+# bind_cols(rev_jan, weather_jan) 
+
+# Join rows of datasets that have # the same columns: 
+# bind_rows(rev_jan, rev_feb)
+
+# merging tables using keys
+# data.table
+# inner join
+merge(rev_data, weather_data, by = "DATE")
+# Or:
+# setkey(rev_data, DATE)
+# rev_data[weather_data, nomatch = 0]
+
+# # dplyr
+# rev_data %>% 
+#   inner_join( weather_data, by = "DATE")
+
+# outer join (left)
+# data.table
+merge(rev_data, weather_data, all.x = TRUE, by = "DATE") 
+# Or: 
+# setkey(weather_data, DATE) 
+# weather_data[rev_data]
+
+# dplyr
+# rev_data %>% 
+#   left_join( weather_data, by = "DATE")
+
+# outer join (right)
+# data.table
+merge(rev_data, weather_data, all.y = TRUE, by = "DATE") 
+# Or: 
+# setkey(rev_data, DATE) 
+# rev_data[weather_data]
+
+# dplyr
+# rev_data %>%
+#   right_join(weather_data, by = "DATE")
+
+# full join
+# data.table
+merge(rev_data, weather_data, all = TRUE, by = "DATE")
+
+# dplyr
+# rev_data %>% 
+#   full_join( weather_data, by = "DATE")
+
+# preparing the data
+filter_data <- weather_data[TEMPERATURE < 0 & DATE %between% c("2020-02-01", "2020-02-29"), ]
+head(filter_data)
+
+# using a semijoin
+# data.table
+setkey(rev_data, DATE)
+rev_data[rev_data[filter_data, which = TRUE]]
+
+# dplyr
+# rev_data %>%
+#   semi_join(filter_data, by = "DATE")
+
+# antijoin
+# data.table
+setkey(rev_data, DATE)
+rev_data[!filter_data]
+
+# dplyr
+# rev_data %>%
+#   anti_join(filter_data, by = "DATE")
+```
 
 # Summarizing data sets
 
