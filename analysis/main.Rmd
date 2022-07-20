@@ -162,6 +162,7 @@ library(psych)
 library(Hmisc)
 library(skimr)
 library(gapminder)
+library(lsr)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -748,8 +749,8 @@ billboard %>%
   )
 
 # multiple variables stored in column names
-head(who)
-who %>% 
+head(tidyr::who)
+tidyr::who %>%
   pivot_longer(
 cols = new_sp_m014:newrel_f65,
 names_to = c("diagnosis", "gender", "age"),
@@ -813,24 +814,25 @@ En lugar de encapsular y encadenar `ifelse()`, podemos usar la función `case_wh
 Nuestro conjunto de datos contiene datos diarios desde el 1 de enero de 1980 hasta el 31 de diciembre de 2015. Así que únicamente debemos crear un vector con fechas de este periodo. En la función `complete()` indicamos la columna que queremos completar y le asignamos el vector entero de fechas. El resultado es un nuevo `data.frame` con todas las fechas, rellenando el resto de columnas con NA.
 
 ```{r}
-# ta_vigo <- read_csv( "input/TG_STAID001395.txt", skip = 20)
-# head(ta_vigo)
-# 
-# ta_vigo <- mutate(ta_vigo, DATE = lubridate::ymd(DATE), TG = ifelse(TG == -9999, NA, TG / 10)) %>%
-#   filter(DATE >= "1980-01-01", DATE <= "2015-12-31") %>%
-#   select(-STAID:-SOUID, -Q_TG) %>%
-#   rename(date = DATE)
-# head(ta_vigo)
-# 
-# horas_sol <- read_csv("input/SS_STAID001395.txt", skip = 19)
-# horas_sol <- mutate(horas_sol, DATE = lubridate::ymd(DATE), SS = ifelse(SS == -9999, NA, SS / 10), month = month(DATE), year = year(DATE))
-# horas_sol <- rename(horas_sol, date = DATE, sunhours = SS)
-# horas_sol
-# data_vigo <- left_join (ta_vigo, horas_sol, by = "date" )
-# data_vigo
-# rio::export(data_vigo, file = "data_vigo.csv")
+ta_vigo <- read_csv( "input/TG_STAID001395.txt", skip = 20)
+head(ta_vigo)
+
+ta_vigo <- mutate(ta_vigo, DATE = lubridate::ymd(DATE), TG = ifelse(TG == -9999, NA, TG / 10)) %>%
+  filter(DATE >= "1980-01-01", DATE <= "2015-12-31") %>%
+  select(-STAID:-SOUID, -Q_TG) %>%
+  rename(date = DATE)
+head(ta_vigo)
+
+horas_sol <- read_csv("input/SS_STAID001395.txt", skip = 19)
+horas_sol <- mutate(horas_sol, DATE = lubridate::ymd(DATE), SS = ifelse(SS == -9999, NA, SS / 10), month = month(DATE), year = year(DATE))
+horas_sol <- rename(horas_sol, date = DATE, sunhours = SS)
+horas_sol
+data_vigo <- left_join (ta_vigo, horas_sol, by = "date" )
+data_vigo
+rio::export(data_vigo, file = "input/data_vigo.csv")
 
 # using separate() 
+# data_vigo <- rio::import("input/data_vigo.csv")
 time_df <- select(data_vigo, date) %>%
   separate(date, c("yr", "mo", "dy"), sep = "-") %>%
   mutate_all(as.numeric)
@@ -1074,6 +1076,8 @@ __The key thing to notice is that in this case, single brackets will always retu
 
 Since data frames are a cross between a list and a matrix, it"s not surprising that both matrix and list subscripting techniques apply to data frames. When using logical subscripts with data frames containing missing values, it may be necessary to remove the missing values before the logical comparison is made, or unexpected results may occur. This situation is so common that R provides the `subset` function which accepts a data frame, matrix or vector, and a logical expression as its first two arguments, and which returns a similar object containing only those elements that meet the condition of the logical expression. It insures that missing values don"t get included, and, if its first argument is a data frame or matrix with named columns, it also resolves variable names inside the logical expression from the object passed as the first argument. A further convenience is offered by the `select=` argument which will extract only the specified columns from the data frame passed as the first argument. The argument to `select=` is a vector of integers or variable names which correspond to the columns that are to be extracted. Unlike most other functions in R, names passed through the `select=` argument can be either quoted or unquoted. To ignore columns, their name or index number can be preceded by a negative sign (-). Since the `select=` argument works by replacing variable names with their corresponding column indices, ranges of columns can be specified using variable names. The `subset` function will always return a new data frame, matrix or vector, so it is __not suited for modifying selected parts of a data frame__.
 
+To sort the elements of an object, use the `sort` function. Add the `decreasing=TRUE` option to sort in reverse order. You can control the treatment of NA values by setting the `na.last` argument. To sort a data frame, you need to create a permutation of the indices from the data frame and use these to fetch the rows of the data frame in the correct order. You can generate an appropriate permutation of the indices using the `order` function. The `order` function takes a set of vectors as arguments. It sorts recursively by each vector, breaking ties by looking at successive vectors in the argument list. At the end, it returns a permutation of the indices of the vector corresponding to the sorted order.
+
 ```{r}
 # subsetting a list
 simple <- list(a = c("fred", "sam", "harry"), b = c(24, 17, 19, 22))
@@ -1171,21 +1175,166 @@ life2 <- subset(LifeCycleSavings, select = c(-pop15, -pop75))
 # or
 life2 <- subset(LifeCycleSavings, select = -c(2, 3))
 head(life2)
+
+# sorting with sort()
+w <- c(5, 4, 7, 2, 7, 1)
+sort(w)
+sort(w, decreasing = TRUE)
+length(w) <- 7
+sort(w, na.last = TRUE)
+sort(w, na.last = FALSE)
+
+# usign order() to sort a data frame
+v <- c(11, 12, 13, 15, 14)
+order(v)
+v[order(v)]
+
+u <- c("pig", "cow", "duck", "horse", "rat")
+w <- data.frame(v, u)
+w
+w[order(w$v), ] 
+
+snowdata[order(snowdata$SnowInches), ]
+snowdata[order(snowdata$SnowInches, snowdata$SnowMeters), ]
 ```
 
 ## Tidyverse
 
-Select certain rows based on a logical condition - _dplyr"s_ `filter()`. To check for one condition OR another condition, use the `|` symbol, which means or. You can get the number of rows in a data frame with `nrow()`.
+`filter()` picks rows based on data values, but `select()` chooses columns based on the column names (not values of data within the columns).
+
+Select certain rows based on a logical condition - _dplyr"s_ `filter()`. To check for one condition OR another condition, use the `|` symbol, which means or. You can get the number of rows in a data frame with `nrow()`. To filter by one condition AND a second condition, you can use the `&` sign. Select certain rows based on row number - dplyr’s `slice()`.
+
+Use `arrange(dataframe, colname)` to sort in ascending order and `arrange(dataframe, desc(colname))` to sort in descending order. To sort by a second column in case there are ties in the first column, the syntax is `arrange(dataframe, col1, col2)`.
+
+You can select by specific column name, no quotes or `c()` needed: `select(snowdata, Winter, Boston)`. Select a contiguous group of columns, such as starting with Boston and ending with New York City, with the syntax `select(snowdata, Boston:NYC)`. You can select based on column names containing certain characters; for example, if you had a data frame with column names in the format city_state such as Boston_MA, Chicago_IL, NYC_NY, Fargo_ND and Syracuse_NY, you could select all the New York State entries using `select(dataframe, contains("_NY"))` or `select(dataframe, ends_with("_NY")`. You can delete columns by putting a minus sign before your selection, such as `select(snowdata, -(Boston:Chicago))` or `select(dataframe, -contains("_NY"))`. `select_if()` lets you use `is. functions` such as `is.numeric()` or `is.character()` to choose columns by data type.
+
+The __tidyselect__ functions give you many options to select columns in R. The first function is `everything`. As the name suggests, it lets you select all columns of a data frame. Then we have `last_col`. With this function you can select the last column in a data frame. We have the two functions `starts_with` and `ends_with`. You use these functions when you want to select columns that start or end with exactly a certain string. `starts_with` and `ends_with` works with any character, but also with a vector of characters.
+
+Next we have the `contains` function. `contains` searches for columns that contain a specific string. Note that it does not work with regular  expressions, but searches for exactly the string you specify. By default, however, the function is not case-sensitive. It doesn’t matter if your columns are in uppercase or lowercase. If you are concerned about case sensitivity, set the `ignore.case` argument to `FALSE` (this also works with `starts_with`, `ends_with`, and `matches`). Unlike contains, `matches` works with regular expressions.
+
+The function `num_range` is useful if your column names follow a certain pattern.
+
+Finally, there is the `where` function. `where` is used when you want to select variables of a certain data type. Other predicate functions are:
+
+- `is.double` 
+- `is.logical` 
+- `is.factor` 
+- `is.integer`
+
+You can combine the different selection functions with the `&` and `|` operators.
 
 ```{r}
-# using filter from dplyr
-filter(snowdata, "Boston" > 100)
-filter(snowdata, "Boston" < 20 | "Boston" > 100)
+snowdata <- rio::import("input/BostonChicagoNYCSnowfalls.csv")
+# knowing how may rows
 snowdata[nrow(snowdata), ]
 
+# using filter from dplyr
+filter(snowdata, Boston > 100)
+
+# OR
+filter(snowdata, Boston < 20 | Boston > 100)
+# AND
+filter(snowdata, Boston > 40 & Boston < 50)
+filter(snowdata, Boston > 50, Boston < 80)
+
+# using slice()
+myresults <- slice(snowdata, 60:76)
+
+# arranging data frames
+# ascending order
+arrange(snowdata, Boston)
+# descencing order
+arrange(snowdata, desc(Boston))
+# by a second column
+arrange(snowdata, Boston, NYC)
+
+# selecting columns
+select(snowdata, Winter, Boston)
+select(snowdata, Boston:NYC)
+select(snowdata, contains("C"))
+select(snowdata, ends_with("C"))
+select(snowdata, -ends_with("C"))
+snowdata_numeric <- select_if(snowdata, is.numeric)
+psych::describe(snowdata_numeric)
+
+# tidyselect
+# relocating columns with everything()
+mpg %>%
+  select(manufacturer, cyl, everything()) %>%
+  glimpse()
+
+# selecting the last column
+mpg %>%
+  select(last_col()) %>%
+  glimpse()
+
+# selecting all columns except the last one
+mpg %>%
+  select(!last_col()) %>%
+  glimpse()
+
+# you can use last_col to select the n-to-last column
+mpg %>%
+  select(last_col(1)) %>%
+  glimpse()
+
+# select all columns that start with the letter “m”
+mpg %>%
+  select(starts_with("m")) %>%
+  glimpse()
+
+mpg %>%
+  select(ends_with(c("l", "r"))) %>%
+  glimpse()
+
+# selecting columns that contain certain strings
+mpg %>%
+  select(contains("m")) %>%
+  glimpse()
+
+mpg %>%
+  rename(Manufacturer = manufacturer) %>%
+  select(contains("m", ignore.case = FALSE)) %>%
+  glimpse()
+
+# selecting all columns that contain a number
+billboard %>%
+  select(matches("\\d")) %>%
+  colnames()
+
+billboard %>%
+  select(matches("wk\\d{1}$")) %>%
+  colnames()
+
+anscombe %>%
+  select(matches("[xy][1-2]")) %>%
+  glimpse()
+
+# selecting columns with number ranges
+anscombe %>%
+  select(num_range("x", 1:2)) %>%
+  glimpse()
+
+billboard %>%
+  select(num_range("wk", 1:15)) %>%
+  glimpse()
+
+# selecting columns of a specific type
+billboard %>%
+  select(where(is.character)) %>%
+  glimpse()
+
+# combining selections
+mpg %>%
+  select(where(is.character) & contains("l")) %>%
+  glimpse()
+
+mpg %>%
+  select(where(is.character) | contains("l")) %>%
+  glimpse()
 ```
 
-## data.table vs Tidyverse
+## Packages
 
 _data.table_ and the _tidyverse_ packages offer simpler solutions and speed up the workflow for the types of problems we are dealing with. Both can be used for the same tasks. You can learn one of them or both. The syntax used for data.table is often more concise and arguably more consistent than that in dplyr (it is in essence an extension of the `[i, j]` notation that we have already used for data frames). Second, it is fast and memory-efficient, which makes a huge difference if you are working with big data. On the other hand, many people prefer the syntax in dplyr and _tidyr_, which lends itself exceptionally well for usage with pipes. If you work with small or medium-sized datasets, the difference in performance between the two packages is negligible. _dplyr_ is also much better suited for working directly with databases, which is a huge selling point if your data already is in a database.
 
@@ -1204,7 +1353,6 @@ aq %>% mutate(Wind = Wind * 0.44704) -> aq
 
 
 ```
-
 
 # Linting
 
