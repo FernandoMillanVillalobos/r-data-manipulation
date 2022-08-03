@@ -1482,6 +1482,7 @@ aq[, c("Month", "Day") := NULL] # multiple cols
 
 # chaining commands
 # data.table
+aq <- as.data.table(airquality)
 aq[, Month := nafill(Month, "locf")][, .N, Month]
 # dplyr
 aq %>%
