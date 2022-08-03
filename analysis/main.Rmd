@@ -22,7 +22,7 @@ output:
 # favicon: img/favicon.ico
 # url: "https://walker-data.com/census-r"
 # cover-image: "04-visualizing-census-data_files/figure-html/visualize-error-bars-1.png"
-# description: "This book is an overview of how practitioners can acquire, wrangle, visualize, and model US Census data with the R programming language."
+# description: "This book is an overview of how practitioners can acquire, wrangle, visualize, and model US Census data with the R programming language."≈
 ---
 
 ```{r, include=FALSE}
@@ -380,6 +380,81 @@ read_csv("input/mpg_uppercase.csv", show_col_types = FALSE, name_repair = ~ make
 read_csv("input/mpg_uppercase.csv", show_col_types = FALSE, name_repair = make_clean_names, col_select = c(manufacturer, model)) %>% 
   glimpse()
 ```
+
+Column names often contain spaces, special characters, or are written in a mixture of lower and upper case characters. Such poorly formatted column names can lead to numerous problems. We could easily solve these issues with the `rename` function but this approach does not
+scale. The main difference between remain and `remain_with` is that remain_with changes the column names using a function. The three main arguments of the function are `.data`, `.fn` and `.cols`. `.data` stands for the data frame, `.fn` for the function to apply to the column names, and .`cols` for the columns to apply the function to.
+
+Use a specific naming convention for column names using the `make_clean_names` function from the _janitor_ package. It is used the tilde operator to indicate an anonymous function. This shortcut is needed whenever you need to call certain arguments of a function.
+
+Another use case of `rename_with` is the replacement of characters. We use the `gsub` function to replace a specific character. Alternatively, we could have used the `str_replace` function. With `pattern` we said that we are looking for a group of characters containing one or more digits (\\d+). \\d+ is a regular expression. A group in the `argument` pattern is everything between two brackets. With `replacement` we said that we want to put an underscore in front of this group. The group itself is specified by \\1. If we had two groups, the second group would be specified by \\2.
+
+You can use `.cols` to specify which column names to apply the function to. And you can even use our _tidyselect_ functions for that. Another useful function is `matches.` With `matches`, you can search for specific patterns in your column names and apply a function to the column names that match the pattern.
+
+```{r}
+mpg %>%
+  rename_with(
+    .fn = toupper,
+    .cols = everything()
+  )
+# the same as
+mpg %>%
+  rename_with(
+    .fn = toupper,
+    .cols = everything()
+  ) %>%
+  colnames()
+
+# using janitor to build a specific name convention
+iris %>%
+  rename_with(~ janitor::make_clean_names(., case = "big_camel")) %>%
+  colnames()
+
+# replacing characters
+mpg %>%
+  rename_with(~ gsub("e", "_", .)) %>%
+  colnames()
+# or
+mpg %>%
+  rename_with(~ str_replace(., "e", "_")) %>%
+  colnames()
+
+# replacing characters using grouping function
+anscombe %>%
+  rename_with(~ str_replace(.,
+    pattern = "(\\d+)",
+    replacement = "_\\1"
+  )) %>%
+  colnames()
+
+# renaming variables for specific variables
+anscombe %>%
+  rename_with(~ str_replace(
+    ., "([:alpha:])([1-2])",
+    "\\1psilon\\2_"
+  ), c(y1, y2)) %>%
+  colnames()
+
+# using tidyverse functions
+mpg %>%
+  rename_with(~ toupper(.), where(is.numeric)) %>%
+  colnames()
+
+iris %>%
+  rename_with(
+    ~ str_replace(., "\\.", "_"),
+    starts_with("Sepal")
+  ) %>%
+  colnames()
+
+# using matches
+iris %>%
+  rename_with(
+    ~ str_replace(., "\\.", "_"),
+    matches("[Ww]idth$")
+  ) %>%
+  colnames()
+```
+
 You don"t always read just one file into R. It is not uncommon for your data to be scattered in hundreds or thousands of files. Of course, you don"t want to read these files into R manually. So you need an automatic method for reading in files. Before we can read the files into R, we need to create a character vector of the file paths. You have several options to create such a vector. You can use the R base function `list.files`, which returns character vectors of the names of files in a directory or you use the function `dir_ls` from the _fs_ package. The other option is to use the `dir_ls` function from the _fs_ package. _fs_ provides a cross-platform interface for accessing files on your hard disk. It supports all file operations (deleting, creating files, moving files, etc.).
 
 Now that we know the file paths, we can load the files into R. The tidyverse way to do this is to use the `map_dfr` function from the _purrr_ package. `map_dfr` loops through all the file paths and binds the data frames into a single data frame. The `.x` in the following code stands for the file name. To output the actual csv files and not the filenames, we need to put `.x` (the path) in a `read_*` function. In this example we are working with CSV files. The trick works the same for all rectangular file formats. Another approach is to use the `read_csv` function directly by putting the character vector of the file names directly into `read_csv`.
@@ -858,6 +933,7 @@ date_ts <- seq(lubridate::ymd("1980-01-01"), lubridate::ymd("2015-12-31"), "day"
 data_vigo_subset <- complete(data_vigo_subset, date = date_ts)
 head(data_vigo_subset)
 ```
+
 ## Packages
 
 Sometimes it makes sense to spread an observation over multiple rows (long format), and sometimes it makes more sense to spread a variable across multiple columns (wide format). Some analyses require long data, whereas others require wide data.
@@ -1184,7 +1260,7 @@ length(w) <- 7
 sort(w, na.last = TRUE)
 sort(w, na.last = FALSE)
 
-# usign order() to sort a data frame
+# using order() to sort a data frame
 v <- c(11, 12, 13, 15, 14)
 order(v)
 v[order(v)]
@@ -1196,6 +1272,10 @@ w[order(w$v), ]
 
 snowdata[order(snowdata$SnowInches), ]
 snowdata[order(snowdata$SnowInches, snowdata$SnowMeters), ]
+
+# getting the location of the maximum and minimum values
+which.max(snowdata$Boston)
+which.min(snowdata$Boston)
 ```
 
 ## Tidyverse
@@ -1256,6 +1336,19 @@ select(snowdata, ends_with("C"))
 select(snowdata, -ends_with("C"))
 snowdata_numeric <- select_if(snowdata, is.numeric)
 psych::describe(snowdata_numeric)
+
+# subsetting by row and column numbers
+lastrow <- nrow(snowdata)
+snowdata[lastrow, ]
+
+# one line of code gives you the same exact result as another
+identical(snowdata[76,], snowdata[lastrow,])
+
+# getting the lowest and the highest value
+range(snowdata$Boston)
+
+# pulling the row from snowdata that has the lowest Boston winter snow total
+slice(snowdata, which.min(Boston))
 
 # tidyselect
 # relocating columns with everything()
@@ -1336,11 +1429,27 @@ mpg %>%
 
 ## Packages
 
-_data.table_ and the _tidyverse_ packages offer simpler solutions and speed up the workflow for the types of problems we are dealing with. Both can be used for the same tasks. You can learn one of them or both. The syntax used for data.table is often more concise and arguably more consistent than that in dplyr (it is in essence an extension of the `[i, j]` notation that we have already used for data frames). Second, it is fast and memory-efficient, which makes a huge difference if you are working with big data. On the other hand, many people prefer the syntax in dplyr and _tidyr_, which lends itself exceptionally well for usage with pipes. If you work with small or medium-sized datasets, the difference in performance between the two packages is negligible. _dplyr_ is also much better suited for working directly with databases, which is a huge selling point if your data already is in a database.
+__data.table__ and the __tidyverse__ packages offer simpler solutions and speed up the workflow for the types of problems we are dealing with. Both can be used for the same tasks. You can learn one of them or both. The syntax used for data.table is often more concise and arguably more consistent than that in dplyr (it is in essence an extension of the `[i, j]` notation that we have already used for data frames). Second, it is fast and memory-efficient, which makes a huge difference if you are working with big data. On the other hand, many people prefer the syntax in dplyr and __tidyr__, which lends itself exceptionally well for usage with pipes. If you work with small or medium-sized datasets, the difference in performance between the two packages is negligible. __dplyr__ is also much better suited for working directly with databases, which is a huge selling point if your data already is in a database.
 
-_data.table_ relies heavily on the `[i, j]` notation that is used for data frames in R. It also adds a third element: `[i, j, by]`. Using this, R selects the rows indicated by i, the columns indicated by j and groups them by by. This makes it easy e.g. to compute grouped summaries. With the tidyverse packages you will instead use new functions with names like `filter` and `summarise` to perform operations on your data. These are typically combined using the pipe operator, `%>%`, which makes the code flow nicely from left to right.
+__data.table__ relies heavily on the `[i, j]` notation that is used for data frames in R. It also adds a third element: `[i, j, by]`. Using this, R selects the rows indicated by i, the columns indicated by j and groups them by by. This makes it easy e.g. to compute grouped summaries. With the __tidyverse__ packages you will instead use new functions with names like `filter` and `summarise` to perform operations on your data. These are typically combined using the pipe operator, `%>%`, which makes the code flow nicely from left to right.
 
-_data.table_ syntax, as it only works on _data.table_ objects. __Luckily, _dplyr_ works perfectly when used on data.table objects__.
+__data.table__ syntax, as it only works on __data.table__ objects. __Luckily, __dplyr__ works perfectly when used on data.table objects__. Note that when using data.table, there is not an explicit assignment. Note that when using data.table, there is not an explicit assignment. We don’t use <- to assign the new data frame to aq - instead the assignment happens automatically. This means that you have to be a little bit careful, so that you don’t inadvertently data when playing around with it.
+
+When working with __tidyverse__ packages, commands are usually chained together using `%>%` pipes. When using __data.table__, commands are chained by repeated use of `[]` brackets on the same line.
+
+To change the name of a variable, we can use `setnames` from __data.table__ or `rename` from __dplyr__.
+
+You’ll frequently want to filter away some rows from your data. Perhaps you only want to select rows where a variable exceeds some value, or want to exclude rows with NA values. This can be done in several different ways: using row numbers, using conditions, at random, or using regular expressions.
+
+In some situations you may wish to draw a random sample from your data. This is done using the `sample` (data.table) and `sample_n` (dplyr) functions.
+
+In some cases, particularly when working with text data, you’ll want to filter using regular expressions. __data.table__ has a convenience function called `%like%` that can be used to call `grepl` in an alternative (less opaque?) way. With __dplyr__ we use `grepl` in the usual fashion.
+
+Another common situation is that you want to remove some variables from your data. Perhaps the variables aren’t of interest in a particular analysis that you’re going to perform, or perhaps you’ve simply imported more variables than you need. As with rows, this can be done using numbers, names or regular expressions. When selecting a single column from a data frame, you sometimes want to extract the column as a vector and sometimes as a single-column data frame (for instance if you are going to pass it to a function that takes a data frame as input). You should be a little bit careful when doing this, to make sure that you get the column in the correct format.
+
+In __data.table__, using regular expressions to select columns is done using `grep`. __dplyr__ differs in that it has several convenience functions for selecting columns, like `starts_with`, `ends_with`, `contains`.
+
+Sometimes you don’t want to filter rows, but rearrange their order according to their values for some variable. Similarly, you may want to change the order of the columns in your data. This is often useful for presentation purposes, but can at times also aid in analyses.
 
 ```{r}
 aq <- as.data.table(airquality)
@@ -1351,9 +1460,194 @@ aq[, Wind := Wind * 0.44704]
 # dplyr
 aq %>% mutate(Wind = Wind * 0.44704) -> aq
 
+# computing a new variable based on existing variables
+# data.table
+aq[, Hot := Temp > 90]
+# dplyr
+aq %>% mutate(Hot = Temp > 90) -> aq
 
+# renaming a variable
+# data.table
+setnames(aq, "Hot", "HotDay")
+# dplyr
+# aq %>% rename(HotDay = Hot) -> aq
+
+# removing a variable
+# data.table
+aq[, HotDay := NULL]
+aq[, c("Month", "Day") := NULL] # multiple cols
+# dplyr
+# aq %>% select(-HotDay) -> aq
+# aq %>% select(-Month, -Day) -> aq # multiple cols
+
+# chaining commands
+# data.table
+aq[, Month := nafill(Month, "locf")][, .N, Month]
+# dplyr
+aq %>%
+  fill(Month) %>%
+  group_by(Month, across(days = n()))
+
+# realoading the data
+aq <- as.data.table(airquality)
+
+# filtering using row numbers
+# data.table
+aq[3, ]
+aq[3:5, ]
+aq[c(3, 7, 15), ]
+aq[-c(3, 7, 15), ]
+# dplyr
+aq %>% slice(3)
+aq %>% slice(3:5)
+aq %>% slice(c(3, 7, 15))
+aq %>% slice(-c(3, 7, 15))
+
+# filtering using conditions
+# data.table
+aq[Temp > 90, ]
+aq[Month == 6, ]
+aq[Temp > 90 & Month == 6, ]
+aq[Temp %between% c(80, 90), ]
+aq[frankv(-Temp,
+  ties.method = "min"
+) <= 5, ]
+unique(aq) # removing duplicate rows
+na.omit(aq) # removing rows with missing data
+na.omit(aq, "Ozone") # removing rows with missing Ozone values
+# dplyr
+aq %>% filter(Temp > 90)
+aq %>% filter(Month == 6)
+aq %>% filter(
+  Temp > 90,
+  Month == 6
+)
+aq %>% filter(between(
+  Temp,
+  80, 90
+))
+aq %>% top_n(5, Temp)
+aq %>% distinct # removing duplicate rows
+aq %>% drop_na # removing rows with missing data
+aq %>% drop_na("Ozone") # removing rows with missing Ozone values
+
+# selecting rows at random
+# data.table
+aq[sample(.N, 5), ]
+# dplyr
+aq %>% sample_n(5)
+
+# using regular expressions to select rows
+dogs <- data.table(
+  Name = c(
+    "Bianca", "Bella", "Mimmi", "Daisy",
+    "Ernst", "Smulan"
+  ),
+  Breed = c(
+    "Greyhound", "Greyhound", "Pug", "Poodle",
+    "Bedlington Terrier", "Boxer"
+  ),
+  Desc = c(
+    "Fast, playful", "Fast, easily worried",
+    "Intense, small, loud",
+    "Majestic, protective, playful",
+    "Playful, relaxed",
+    "Loving, cuddly, playful"
+  )
+)
+
+# data.table
+dogs[Name %like% "^B", ]
+# or:
+dogs[grepl("^B", Name), ]
+dogs[Desc %like% "[pP]layful", ]
+# dplyr
+dogs %>% filter(grepl("B[a-z]", Name))
+dogs %>% filter(grepl("[pP]layful", Desc))
+
+# selecting a single column
+# data.table
+# Return a vector:
+aq$Temp
+# or
+aq[, Temp]
+# Return a data.table:
+aq[, "Temp"]
+aq[, .(Temp, Month, Day)]
+aq[, Wind:Month]
+aq[, -c("Month", "Day")]
+aq[, sapply(msleep, class) == "numeric"] # selecting all numeric variables
+aq[, .SD, .SDcols = colSums(is.na(aq)) == 0] # removing cols with missing values
+# dplyr
+# Return a vector:
+aq$Temp
+# or
+aq %>% pull(Temp)
+# Return a tibble:
+aq %>% select(Temp)
+aq %>% select(Temp, Month, Day)
+aq %>% select(Wind:Month)
+aq %>% select(-Month, -Day)
+aq %>% select_if(is.numeric)
+aq %>% select_if(~all(!is.na(.)))
+
+# using regular expressions to select columns
+# data.table
+vars <- grepl("n", names(aq))
+aq[, ..vars]
+# dplyr
+# contains is a convenience
+# function for checking if a name
+# contains a string:
+aq %>% select(contains("n"))
+# matches can be used with any
+# regular expression:
+aq %>% select(matches("n"))
+
+# subsetting using columns numbers
+# using column numbers can yield different results depending on what type of data table you’re using
+aq <- as.data.frame(airquality)
+str(aq[,2])
+# data.table:
+aq <- as.data.table(airquality)
+str(aq[,2])
+# tibble:
+aq <- as_tibble(airquality)
+str(aq[,2])
+
+# aq[[2]]  works the same for data frames, data tables and tibbles, returning a vector
+aq <- as.data.frame(airquality)
+str(aq[[2]])
+# data.table:
+aq <- as.data.table(airquality)
+str(aq[[2]])
+# tibble:
+aq <- as_tibble(airquality)
+str(aq[[2]])
+
+# changing the column order
+# data.table
+setcolorder(aq, c("Month", "Day"))
+# dplyr
+aq %>% relocate("Month", "Day")
+
+# changing row order
+# sorting a single vector
+aq <- data.table(airquality)
+sort(aq$Wind)
+sort(aq$Wind, decreasing = TRUE)
+sort(c("C", "B", "A", "D"))
+# data.table
+aq[order(Wind), ] # ascending order
+aq[order(-Wind), ] # descending order
+aq[order(Temp, -Wind), ]
+# dplyr
+aq %>% arrange(Wind) # ascending order
+aq %>% arrange(-Wind) # descending order
+# or
+aq %>% arrange(desc(Wind))
+aq %>% arrange(Temp, desc(Wind))
 ```
-
 # Linting
 
 The code in this RMarkdown is linted with the [lintr package](https://github.com/jimhester/lintr), which is based on the [tidyverse style guide](http://style.tidyverse.org/).
@@ -1368,5 +1662,3 @@ The code in this RMarkdown is linted with the [lintr package](https://github.com
 # if you have additional scripts and want them to be linted too, add them here
 # lintr::lint("scripts/my_script.R")
 ```
-musp$variable = as.numeric(sub("X","",musp$variable))
-names(musp)[2:3] = c("time","expend")
