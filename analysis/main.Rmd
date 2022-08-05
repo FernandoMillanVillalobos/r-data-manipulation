@@ -794,7 +794,7 @@ merge(cities, states)
 
 ## Tidyverse
 
-There are three interrelated rules which make **a dataset tidy**: 1. Each variable must have its own column. 2. Each observation must have its own row. 3. Each value must have its own cell. These three rules are interrelated because it’s impossible to only satisfy two of the three: 1. Put each dataset in a tibble. 2. Put each variable in a column.
+There are three interrelated rules which make **a dataset tidy**: 1. Each variable must have its own column. 2. Each observation must have its own row. 3. Each value must have its own cell. These three rules are interrelated because it"s impossible to only satisfy two of the three: 1. Put each dataset in a tibble. 2. Put each variable in a column.
 
 - **Wide** form: every row corresponds to a unique *subject.*
 - **Long** form: every row corresponds to a unique *measurement.*
@@ -971,7 +971,7 @@ It is common that data is spread over multiple tables. Consequently, it is impor
 
 An operation that combines columns from two tables is called a __join__. There are two main types of joins: __inner joins__ and __outer joins__.
 
-- __Inner joins__: create a table containing all observations for which the key appeared in both tables. So if we perform an inner join on the `rev_data` and `weather_data` tables using `DATE` as the key, it won’t contain data for the days that are missing from either the revenue table or the weather table. 
+- __Inner joins__: create a table containing all observations for which the key appeared in both tables. So if we perform an inner join on the `rev_data` and `weather_data` tables using `DATE` as the key, it won"t contain data for the days that are missing from either the revenue table or the weather table. 
 
 In contrast, outer joins create a table retaining rows, even if there is no match in the other table. There are three types of outer joins:
 
@@ -1276,13 +1276,91 @@ snowdata[order(snowdata$SnowInches, snowdata$SnowMeters), ]
 # getting the location of the maximum and minimum values
 which.max(snowdata$Boston)
 which.min(snowdata$Boston)
+
+# using indexes on the rows and/or columns
+rows <- Arthritis$Sex == "Female" & Arthritis$Age > 68
+cols <- c("Treatment", "Improved")
+Arthritis[rows, cols]
+
+# using names of values of a column to subset and create a new variable (no data)
+# btw9s[c("BB", "BE", "MV","SN","ST","TH"), "EW"] <- "East"
+
+# creating new variables based on others and reordering (no data)
+# Fleiss93 <- within(Fleiss93, {
+#   total <- n.e + n.c # create new var based on the sum of two
+#   st1 <- as.character(study) # change type
+#   st <- reorder(study, -(total)) # reorder var
+# })
+
+# fixing the naming (no data)
+# exp1_long$condition <- ifelse(exp1_long$condition == "no", "No_communication",
+#   ifelse(exp1_long$condition == "go", "High_confidence",
+#     ifelse(exp1_long$condition == "me", "Medium_confidence",
+#       ifelse(exp1_long$condition == "ba", "Low_confidence",
+#         exp1_long$condition
+#       )
+#     )
+#   )
+# )
+
+# renaming variables and convert to numeric (no data)
+# exp1_long$temperature <- as.numeric(ifelse(exp1_long$temperature == "315", "31.5",
+#   ifelse(exp1_long$temperature == "325", "32.5",
+#     ifelse(exp1_long$temperature == "335", "33.5",
+#       ifelse(exp1_long$temperature == "345", "34.5",
+#         ifelse(exp1_long$temperature == "355", "35.5",
+#           ifelse(exp1_long$temperature == "365", "36.5",
+#             exp1_long$temperature
+#           )
+#         )
+#       )
+#     )
+#   )
+# ))
+
+# recoding Yes/No responses as numeric (Yes=1, No=0) (no data)
+# exp1_long$response_code <- ifelse(exp1_long$response == "Yes", 1, 0)
+
+# adding values by row and getting rid of all NAs (no data)
+# df.a$expertise_sum <- rowSums(df.a[, 12:19], na.rm = TRUE)
+
+# cutting numeric variables into categories
+age <- c(60, 58, 24, 26, 34, 42, 31, 30, 33, 2, 9)
+age.breaks <- seq(from = 0, to = 60, by = 20)
+age.labels <- c("young", "adult", "older")
+age.group <- cut(x = age, breaks = age.breaks, labels = age.labels)
+age.df <- data.frame(age, age.group)
+age.df
+
+# creating a temporal seq of years and calculate mean (no data)
+# yrs <- c(seq(1972, 1988, 4), 1993, seq(1996, 2016, 4)) # seq every 4 years
+# Calculating mean for every year 
+# mean_age <- gss_lon %>%
+#   filter(age %nin% NA && year %in% yrs) %>%
+#   group_by(year) %>%
+#   summarize(xbar = round(mean(age, na.rm = TRUE), 0))
+
+# splitting a vector by group (no data)
+# using split function: x = the variable that needs to be split into groups; y = the grouping variable
+# speech.by.char <- split(x = utterance, y = speaker)
+# speech.by.char
+
+# pull variables from a list or data frame out and into the workspace
+# importList(speech.by.char)
+
+# locating NAs in a data frame
+# pos_country <- which(is.na(df$Region))
+
+# replacing NAs in a data frame for the last value with na.locf() (no data)
+# replacing NAs for the last value
+# df <- mutate(df, Region = zoo::na.locf(Region))
 ```
 
 ## Tidyverse
 
 `filter()` picks rows based on data values, but `select()` chooses columns based on the column names (not values of data within the columns).
 
-Select certain rows based on a logical condition - _dplyr"s_ `filter()`. To check for one condition OR another condition, use the `|` symbol, which means or. You can get the number of rows in a data frame with `nrow()`. To filter by one condition AND a second condition, you can use the `&` sign. Select certain rows based on row number - dplyr’s `slice()`.
+Select certain rows based on a logical condition - _dplyr"s_ `filter()`. To check for one condition OR another condition, use the `|` symbol, which means or. You can get the number of rows in a data frame with `nrow()`. To filter by one condition AND a second condition, you can use the `&` sign. Select certain rows based on row number - dplyr"s `slice()`.
 
 Use `arrange(dataframe, colname)` to sort in ascending order and `arrange(dataframe, desc(colname))` to sort in descending order. To sort by a second column in case there are ties in the first column, the syntax is `arrange(dataframe, col1, col2)`.
 
@@ -1290,7 +1368,7 @@ You can select by specific column name, no quotes or `c()` needed: `select(snowd
 
 The __tidyselect__ functions give you many options to select columns in R. The first function is `everything`. As the name suggests, it lets you select all columns of a data frame. Then we have `last_col`. With this function you can select the last column in a data frame. We have the two functions `starts_with` and `ends_with`. You use these functions when you want to select columns that start or end with exactly a certain string. `starts_with` and `ends_with` works with any character, but also with a vector of characters.
 
-Next we have the `contains` function. `contains` searches for columns that contain a specific string. Note that it does not work with regular  expressions, but searches for exactly the string you specify. By default, however, the function is not case-sensitive. It doesn’t matter if your columns are in uppercase or lowercase. If you are concerned about case sensitivity, set the `ignore.case` argument to `FALSE` (this also works with `starts_with`, `ends_with`, and `matches`). Unlike contains, `matches` works with regular expressions.
+Next we have the `contains` function. `contains` searches for columns that contain a specific string. Note that it does not work with regular  expressions, but searches for exactly the string you specify. By default, however, the function is not case-sensitive. It doesn"t matter if your columns are in uppercase or lowercase. If you are concerned about case sensitivity, set the `ignore.case` argument to `FALSE` (this also works with `starts_with`, `ends_with`, and `matches`). Unlike contains, `matches` works with regular expressions.
 
 The function `num_range` is useful if your column names follow a certain pattern.
 
@@ -1433,23 +1511,25 @@ __data.table__ and the __tidyverse__ packages offer simpler solutions and speed 
 
 __data.table__ relies heavily on the `[i, j]` notation that is used for data frames in R. It also adds a third element: `[i, j, by]`. Using this, R selects the rows indicated by i, the columns indicated by j and groups them by by. This makes it easy e.g. to compute grouped summaries. With the __tidyverse__ packages you will instead use new functions with names like `filter` and `summarise` to perform operations on your data. These are typically combined using the pipe operator, `%>%`, which makes the code flow nicely from left to right.
 
-__data.table__ syntax, as it only works on __data.table__ objects. __Luckily, __dplyr__ works perfectly when used on data.table objects__. Note that when using data.table, there is not an explicit assignment. Note that when using data.table, there is not an explicit assignment. We don’t use <- to assign the new data frame to aq - instead the assignment happens automatically. This means that you have to be a little bit careful, so that you don’t inadvertently data when playing around with it.
+__data.table__ syntax, as it only works on __data.table__ objects. __Luckily, __dplyr__ works perfectly when used on data.table objects__. Note that when using data.table, there is not an explicit assignment. Note that when using data.table, there is not an explicit assignment. We don"t use <- to assign the new data frame to aq - instead the assignment happens automatically. This means that you have to be a little bit careful, so that you don"t inadvertently data when playing around with it.
 
 When working with __tidyverse__ packages, commands are usually chained together using `%>%` pipes. When using __data.table__, commands are chained by repeated use of `[]` brackets on the same line.
 
 To change the name of a variable, we can use `setnames` from __data.table__ or `rename` from __dplyr__.
 
-You’ll frequently want to filter away some rows from your data. Perhaps you only want to select rows where a variable exceeds some value, or want to exclude rows with NA values. This can be done in several different ways: using row numbers, using conditions, at random, or using regular expressions.
+You"ll frequently want to filter away some rows from your data. Perhaps you only want to select rows where a variable exceeds some value, or want to exclude rows with NA values. This can be done in several different ways: using row numbers, using conditions, at random, or using regular expressions.
 
 In some situations you may wish to draw a random sample from your data. This is done using the `sample` (data.table) and `sample_n` (dplyr) functions.
 
-In some cases, particularly when working with text data, you’ll want to filter using regular expressions. __data.table__ has a convenience function called `%like%` that can be used to call `grepl` in an alternative (less opaque?) way. With __dplyr__ we use `grepl` in the usual fashion.
+In some cases, particularly when working with text data, you"ll want to filter using regular expressions. __data.table__ has a convenience function called `%like%` that can be used to call `grepl` in an alternative (less opaque?) way. With __dplyr__ we use `grepl` in the usual fashion.
 
-Another common situation is that you want to remove some variables from your data. Perhaps the variables aren’t of interest in a particular analysis that you’re going to perform, or perhaps you’ve simply imported more variables than you need. As with rows, this can be done using numbers, names or regular expressions. When selecting a single column from a data frame, you sometimes want to extract the column as a vector and sometimes as a single-column data frame (for instance if you are going to pass it to a function that takes a data frame as input). You should be a little bit careful when doing this, to make sure that you get the column in the correct format.
+Another common situation is that you want to remove some variables from your data. Perhaps the variables aren"t of interest in a particular analysis that you"re going to perform, or perhaps you"ve simply imported more variables than you need. As with rows, this can be done using numbers, names or regular expressions. When selecting a single column from a data frame, you sometimes want to extract the column as a vector and sometimes as a single-column data frame (for instance if you are going to pass it to a function that takes a data frame as input). You should be a little bit careful when doing this, to make sure that you get the column in the correct format.
 
 In __data.table__, using regular expressions to select columns is done using `grep`. __dplyr__ differs in that it has several convenience functions for selecting columns, like `starts_with`, `ends_with`, `contains`.
 
-Sometimes you don’t want to filter rows, but rearrange their order according to their values for some variable. Similarly, you may want to change the order of the columns in your data. This is often useful for presentation purposes, but can at times also aid in analyses.
+Sometimes you don"t want to filter rows, but rearrange their order according to their values for some variable. Similarly, you may want to change the order of the columns in your data. This is often useful for presentation purposes, but can at times also aid in analyses.
+
+In some cases, you may want to fill missing values of a variable with the previous non-missing entry. To fill the missing values with the last non-missing entry, we can now use `nafill` or `fill`.
 
 ```{r}
 aq <- as.data.table(airquality)
@@ -1606,7 +1686,7 @@ aq %>% select(contains("n"))
 aq %>% select(matches("n"))
 
 # subsetting using columns numbers
-# using column numbers can yield different results depending on what type of data table you’re using
+# using column numbers can yield different results depending on what type of data table you"re using
 aq <- as.data.frame(airquality)
 str(aq[,2])
 # data.table:
@@ -1648,7 +1728,154 @@ aq %>% arrange(-Wind) # descending order
 # or
 aq %>% arrange(desc(Wind))
 aq %>% arrange(Temp, desc(Wind))
+
+# filling in missing values
+aq$Month[c(2:3, 36:39, 70)] <- NA
+# data.table
+aq[, Month := data.table::nafill(Month, "locf")] # fill the missing values with the last non-missing entry
+aq[, Month := nafill(Month, "nocb")] # fill the missing values with the next non-missing entry
+# dplyr
+aq %>% fill(Month) -> aq 
+aq %>% fill(Month, .direction = "up") -> aq
 ```
+
+# String manipulation
+
+## Base-R
+
+Character values in R can be stored as scalars, vectors, or matrices, or they can be columns of a data frame or elements of a list. When applied to objects like this, the `length` function will report the number of character values in the object, not the number of characters in each string. To find the number of characters in a character value, the `nchar` function can be used. Like most functions in R, `nchar` is vectorized.
+
+Like other objects in R, character values will be displayed when their name is typed at the console or when they are passed to the print function. However, it is often more convenient to print or display these objects directly without the subscripts that the print function provides. The `cat` function will combine character values and print them to the screen or a file directly. The `cat` function coerces its arguments to character values, then concatenates and displays them. This makes the function ideal for printing messages and warnings from inside of functions.
+
+`cat` will always print a newline when it encounters a newline character. When there are multiple strings passed to `cat`, or when the argument to `cat` is a vector of character strings, the `fill=` argument can be used to automatically insert newlines into the output string. If `fill=` is set to `TRUE`, the value of the system width option will be used to determine the linesize; if a numeric value is used, the output will be displayed using that width, although cat will not insert newlines into individual elements of its input.
+
+The cat function also accepts a `file=` argument to specify that its output should be directed to a file. When the `file=` argument is used, the `append=TRUE` argument can also be provided to have cat append its output to an already existing file. For more control over the way that character values are concatenated, the `paste` function can be used. In its simplest usage, this function will accept an unlimited number of scalars, and join them together, separating each scalar with a space by default. To use a character string other than a space as a separator, the `sep=` argument can be used. If any object passed to paste is not of mode character, it is converted to character. If a character vector is passed to paste, the `collapse=` argument can be used to specify a character string to place between each element of the vector.
+
+When multiple arguments are passed to `paste`, it will vectorize the operation, recycling shorter elements when necessary. This makes it easy to generate variable names with a common prefix.
+
+Individual characters of character values are not accessible through ordinary subscripting. Instead, the `substring` function can be used either to extract parts of character strings, or to change the values of parts of character strings. In addition to the string being operated on, `substring` accepts a `first=` argument giving the first character of the desired `substring`, and a `last=` argument giving the last character. If not specified, `last=` defaults to a large number, so that specifying just a `start=` value will operate from that character to the end of the string. Like most functions in R, `substring` is vectorized, operating on multiple strings at once. In the case of strings that have fewer characters than specified in the `last=` argument, `substring` returns as many characters as it finds with no padding provided.
+
+For finding locations of particular characters within a character string, the string first needs to be converted to a character vector containing individual characters. This can be done by passing a vector consisting of all the characters to be processed as both the `first=` and `last=` arguments, and then applying `which` to the result.
+
+Regular expressions are supported in the R functions `strsplit`, `grep`, `sub`, and `gsub`, as well as in the `regexpr` and `gregexpr` functions which are the main tools for working with regular expressions in R. Regular expression syntax varies depending on the particular implementation a program uses. R tries to provide a great deal of flexibility regarding the regular expressions it understands. By default, R uses a basic set of regular expressions similar to those used by UNIX utilities like grep. The `extended=TRUE` argument to R functions that support regular expressions extend the set of regular expressions to include those supported by the POSIX 1003.2 standard. To use regular expressions like those supported by scripting languages such as perl and python, the `perl=TRUE` argument can be used.
+
+The backslash character (`\`) is used in regular expressions to signal that certain characters with special meaning in regular expressions should be treated as normal characters. In R, this means that two backslash characters need to be entered into an input string anywhere that special characters need to be escaped. Although the double backslash will display when the string is printed, `nchar` or `cat` can verify that only a single backslash is actually included in the string.
+
+Single backslashes, like those which are part of a newline character (`\n`), will be interpreted correctly inside of regular expressions.
+
+![Modifers for regular expressions](input/img/regex.png) 
+The `strsplit` function can use a character string or regular expression to divide up a character string into smaller pieces. The first argument to `strsplit` is the character string to break up, and the second argument is the character value or regular expression which should be used to break up the string into parts.Like other functions that can return different numbers of elements from their inputs, `strsplit` returns its results as a list, even when its input is a single character string. Because `strsplit` can accept regular expressions to decide where to split a character string, a wide variety of situations can be easily handled.
+
+The `grep` function accepts a regular expression and a character string or vector of character strings, and returns the indices of those elements of the strings which are matched by the regular expression. If the `value=TRUE` argument is passed to grep, it will return the actual strings which matched the expression instead of the indices. If the string to be matched should be interpreted literally (i.e., not as a regular expression), the `fixed=TRUE` argument should be used. One important use of `grep` is to extract a set of variables from a data
+frame based on their names. To create a data frame with just these variables, we can use the output of `grep` as a subscript. To find regular expressions without regard to the case (upper or lower) of the input, the `ignore.case=TRUE` argument can be used.
+
+Surrounding a string with escaped angle brackets (`\\< and \\>`) restricts matches to the case where the string is surrounded by either white space, punctuation, or a line ending or beginning. If the regular expression passed to grep is not matched in any of its inputs, `grep` returns an empty numeric vector. Thus, the any function can be used to test if a regular expression occurs anywhere in a vector of strings.
+
+While the `grep` function can be used to test for the presence of a regular expression, sometimes more details regarding the matches that are found are needed. In R, the `regexpr` and `gregexpr` functions can be used to pinpoint and possibly extract those parts of a string that were matched by a regular expression. The output from these functions is a vector of starting positions of the regular expressions which were found; if no match occurred, a value of -1 is returned. In addition, an attribute called match.length is associated with the vector of starting positions to provide information about exactly which characters were involved in the match. The `regexpr` function will only provide information about the first match in its input string(s), while the `gregexpr` function returns information about all matches found. The input arguments to `regexpr` and `gregexpr` are similar to those of grep; however, the `ignore.case=TRUE` argument is not available in versions of R earlier than version 2.6.
+
+Since `regexpr` only reports the first match it finds, it will always return a vector, with -1 in those positions where no match was found. To extract the strings that actually matched, `substr` can be used, after calculating the ending position from the `regexpr` output and the `match.length` attribute.
+
+For substituting text based on regular expressions, R provides two functions: `sub` and `gsub.` Each of these functions accepts a regular expression, a string containing what will be substituted for the regular expression, and the string or strings to operate on. The `sub` function changes only the first occurrence  of the regular expression, while the `gsub` function performs the substitution on all occurrences within the string. One important use of these functions concerns numeric data which is read from text sources like web pages or financial reports, and which may contain commas or dollar signs.
+
+When using the substitution functions, a powerful feature known as tagging of regular expressions is available. When part of a regular expression is surrounded by (unescaped) parentheses, that part can be used in a substitution pattern by representing it as a backslash followed by a number. The first tagged pattern is represented by `\\1`, the second by `\\2`, and so on. To extract just the tagged pattern from a regular expression, one possibility is to use the regular expression beginning and end anchor characters (`^` and `$`, respectively) to account for all the nontagged characters in the string, and specify just the tagged expression for the substitution string.
+
+```{r}
+# finding the lengths of the names of the states of USA
+nchar(state.name)
+
+# using cat function
+x = 7
+y = 10
+cat("x should be greater than y, but x=',x,' and y=',y,' x should be greater than y, but x = 7 and y = 10")
+# with fill argument
+cat("Long strings can", "be displayed over", "several lines using", "the fill= argument", fill = 40)
+
+# using paste
+paste("one", 2, "three", 4, "five")
+paste(c("one", "two", "three", "four"), collapse = " ")
+paste(c("X", "Y"), 1:5, sep = "")
+paste(c("X", "Y"), 1:5, sep = "_", collapse = "|")
+paste(c("X", "Y"), 1:5, sep = "_") # with space -> no collapse argument
+
+# working with parts of character values
+substring(state.name, 2, 6)
+
+# finding location of particular characters
+state <- "Mississippi"
+ll <- nchar(state)
+ltrs <- substring(state, 1:ll, 1:ll)
+ltrs
+which(ltrs == "s")
+
+# regular expressions
+expr <- ".*\\.txt"
+nchar(expr)
+cat(expr, "\n")
+
+# breaking apart character values
+sentence <- "R is a free software environment for statistical computing"
+parts <- strsplit(sentence, " ")
+parts
+length(parts)
+length(parts[[1]])
+sapply(parts, length)
+allparts <- unlist(parts)
+allparts
+
+str <- "one two three four"
+strsplit(str, " +")
+
+# using regex
+grep("^pop", names(LifeCycleSavings)) # indices
+grep("^pop", names(LifeCycleSavings), value = TRUE) # values
+
+# creating a data frame using grep as a subscript
+head(LifeCycleSavings[, grep("^pop", names(LifeCycleSavings))])
+
+# ignoring upper or lower case
+inp <- c("run dog run", "work doggedly", "CAT AND DOG")
+grep("\\<dog\\>", inp, ignore.case = TRUE)
+
+# checking if a regex occurs anywhere in text
+str1 <- c("The R Foundation", "is a not for profit organization", "working in the public interest")
+str2 <- c(" It was founded by the members", "of the R Core Team in order", "to provide support for the R project")
+any(grep("profit", str1))
+any(grep("profit", str2))
+
+# using regexpr
+tst <- c("one x7 two b1", "three c5 four b9", "five six seven", "a8 eight nine")
+wh <- regexpr("[a-z][0-9]", tst)
+wh
+res <- substring(tst, wh, wh + attr(wh, "match.length") - 1)
+res
+
+# using gregexpr
+wh1 <- gregexpr("[a-z][0-9]", tst)
+wh1
+res1 = list()
+for (i in 1:length(wh1)) {
+  res1[[i]] <- substring(
+    tst[i], wh1[[i]],
+    wh1[[i]] +
+      attr(wh1[[i]], "match.length") - 1
+  )
+}
+res1
+
+# substitutions
+values <- c("$11,317.35", "$11,234.51", "$11,275.89", "$11,278.93", "$11,294.94")
+as.numeric(gsub("[$,]", "", values))
+
+# tagging
+values <- c("75.99", "(20.30)", "55.20")
+as.numeric(gsub("\\(([0-9.]+)\\)", "-\\1", values))
+
+# extracting the tagged pattern
+str <- "report: 17 value=12 time=2:00"
+sub("value=([^ ]+)", "\\1", str)
+sub("^.*value=([^ ]+).*$", "\\1", str)
+```
+
 # Linting
 
 The code in this RMarkdown is linted with the [lintr package](https://github.com/jimhester/lintr), which is based on the [tidyverse style guide](http://style.tidyverse.org/).
