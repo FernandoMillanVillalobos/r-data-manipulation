@@ -163,6 +163,7 @@ library(Hmisc)
 library(skimr)
 library(gapminder)
 library(lsr)
+library(chron)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -2125,6 +2126,242 @@ gss_cat %>%
   ggplot() +
   geom_col(aes(y = n, x = marital)) +
   coord_flip()
+```
+# Dates and Times
+
+## Base-R
+
+R provides several options for dealing with date and date/time data. The builtin `as.Date` function handles dates (without times); the contributed package `chron` handles dates and times, but does not control for time zones; and the `POSIXct` and `POSIXlt` classes allow for dates and times with control for time zones. The general rule for date/time data in R is to use the simplest technique possible. Thus, for date only data, `as.Date` will usually be the best choice. If you need to handle dates and times, without time-zone information, the `chron` package is a good choice; the `POSIX` classes are especially useful when time-zone manipulation is important. Also, don’t overlook the various “as.” functions (like `as.Date` and `as.POSIXlt`) for converting among the different date types when necessary. Except for the `POSIXlt` class, dates are stored internally as the number of days or seconds from some reference date. Thus, dates in R will generally have a numeric mode, and the class function can be used to find the way they are actually being stored. The `POSIXlt` class stores date/time values as a list of components (hour, min, sec, mon, etc.) making it easy to extract these parts. To get the current date, the `Sys.Date` function will return a Date object which can be converted to a different class if necessary.
+
+The `as.Date` function allows a variety of input formats through the `format=` argument. The default format is a four-digit year, followed by a month, then a day, separated by either dashes or slashes. If your input dates are not in the standard format, a format string can be composed using the elements shown in the following table.
+
+![Format codes for dates](input/img/format-codes-dates.png)
+Internally, Date objects are stored as the number of days since __January 1, 1970__, using negative numbers for earlier dates. The `as.numeric` function can be used to convert a Date object to its internal form. To convert this form back to a Date object, it can be assigned a class of Date directly. To extract the components of the `dates`, the `weekdays`, `months`, `days`, or `quarters` functions can be used.
+
+The `chron` function converts dates and times to chron objects. The dates and times are provided to the `chron` function as separate values, so some preprocessing may be necessary to prepare input date/times for the `chron` function. When using character values, the default format for dates is the decimal month value followed by the decimal day value followed by the year, using the slash as a separator. Alternatively, dates can be specified by a numeric value, representing the number of days since January 1, 1970. To input dates stored as the day of the year, the `origin=` argument can be used to interpret numeric dates relative to a different date. The default format for times consists of the hour, minutes, and seconds, separated by colons. Often the first task when using the `chron` package is to break apart the date and times if they are stored together. Chron values are stored internally as the fractional number of days from January 1, 1970. The `as.numeric` function can be used to access the internal values.
+
+![Format codes for chron objects](input/img/format-codes-chron.png)
+`POSIX` represents a portable operating system interface, primarily for UNIX systems, but available on other operating systems as well. Dates stored in the `POSIX` format are date/time values (like dates with the `chron` package), but also allow modification of time zones. Unlike the `chron` package, which stores times as fractions of days, the `POSIX` date classes store times to the nearest second, so they provide a more accurate representation of times. There are two `POSIX` `date/time` classes, which differ in the way that the values are stored internally. The `POSIXct` class stores date/time values as the number of seconds since January 1, 1970, while the `POSIXlt` class stores them as a list with elements for second, minute, hour, day, month, and year, among others. Unless you need the list nature of the `POSIXlt` class, the `POSIXct` class is the usual choice for storing dates in R. The default input format for `POSIX` dates consists of the year, followed by the month and day, separated by slashes or dashes; for date/time values, the date may be followed by white space and a time in the form hour:minutes:seconds or hour:minutes. Valid POSIX date or date/time inputs:
+
+- 1915/6/16
+- 2005-06-24 11:25
+- 1990/2/17 12:20:05
+
+If your input date/times are stored as the number of seconds from January 1, 1970, you can create `POSIX` date values by assigning the appropriate class directly to those values. Since many date manipulation functions refer to the `POSIXt` pseudo-class, be sure to include it in the class attribute of the values.
+
+The `POSIX` date/time classes take advantage of the POSIX date/time implementation of your operating system, allowing dates and times in R to be manipulated in the same way they would be in, for example, a C program. The two most important functions in this regard are `strptime`, for inputting dates, and `strftime`, for formatting dates for output. Both of these functions use a variety of formatting codes. Nonformat characters (like the slashes) are interpreted literally. When using `strptime`, an optional time zone can be specified with the `tz=` option.
+
+![Format codes for strftime and strptime](input/img/format-codes-str.png)
+Since `POSIX` date/time values are stored internally as the number of seconds since January 1, 1970, they can easily use times that are not represented by a formatted version of the hour, minute, and second. Another way to create POSIX dates is to pass the individual components of the time to the `ISOdate` function. `ISOdate` will accept both numeric and character arguments.
+
+For formatting dates for output, the format function will recognize the type of your input date, and perform any necessary conversions before calling `strftime`, so `strftime` rarely needs to be called directly.
+
+When using `POSIX` dates, the optional `usetz=TRUE` argument to the format function can be specified to indicate that the time zone should be displayed. Additionally, `as.POSIXlt` and `as.POSIXct` can also accept Date or `chron` objects, so they can be input as described in the previous sections and converted as needed. Conversion between the two `POSIX` forms is also possible. The individual components of a `POSIX` date/time object can be extracted by first converting to `POSIXlt` if necessary, and then accessing the components directly.
+
+Many of the statistical summary functions, like `mean`, `min`, `max`, etc are able to transparently handle date objects. If two times (using any of the date or date/time classes) are subtracted, R will return the result in the form of a time difference, which represents a `difftime` object. If an alternative unit of time was desired, the `difftime` function could be called, using the optional `units=` argument with any of the following values: “auto”, “secs”, “mins”, “hours”, “days”, or “weeks”.
+
+Although `difftime` values are displayed with their units, they can be manipulated like ordinary numeric variables; arithmetic performed with these values will retain the original units. To convert a time difference in days to one of years, a good approximation is to divide the number of days by 365.25. However, the `difftime` value will display the time units as days. To modify this, the units attribute of the object can be modified.
+
+The `by=` argument to the seq function can be specified either as a `difftime` value, or in any units of time that the `difftime` function accepts, making it very easy to generate sequences of dates. All the date classes except for `chron` will accept an integer before the interval
+provided as a `by=` argument. The `cut` function also understands units of days, weeks, months, and years, making it very easy to create factors grouped by these units.
+
+Format codes can also be used to extract parts of dates, as an alternative to the `weekdays` and other functions. This same technique can be used to convert dates to factors.
+
+```{r}
+# using as.Date
+as.Date("1915-6-16")
+as.Date("1990/02/17")
+as.Date("1/15/2001", format = "%m/%d/%Y")
+as.Date("April 26, 2001", format = "%B %d, %Y")
+as.Date("22JUN01", format = "%d%b%y")
+
+# converting date to numeric and back to date
+thedate <- as.Date("1/15/2001", format = "%m/%d/%Y")
+ndate <- as.numeric(thedate)
+ndate
+class(ndate) <- "Date"
+ndate
+
+# using chron
+dtimes <- c("2002-06-09 12:45:40", "2003-01-29 09:30:40", "2002-09-04 16:45:40", "2002-11-13 20:00:40", "2002-07-07 17:30:40")
+dtparts <- t(as.data.frame(strsplit(dtimes, " ")))
+row.names(dtparts) <- NULL
+thetimes <- chron(dates = dtparts[, 1], times = dtparts[, 2], format = c("y-m-d", "h:m:s"))
+thetimes
+
+# using POSIXlt
+dts <- c("2005-10-21 18:47:22", "2005-12-24 16:39:58", "2005-10-28 07:30:05 PDT")
+as.POSIXlt(dts)
+
+# using POSIXct
+dts <- c(1127056501, 1104295502, 1129233601, 1113547501, 1119826801, 1132519502, 1125298801, 1113289201)
+mydates <- dts
+class(mydates) <- c("POSIXt", "POSIXct")
+mydates
+# or
+# mydates <- structure(dts, class = c("POSIXt", "POSIXct"))
+
+# using strptime
+mydate <- strptime("16/Oct/2005:07:51:00", format = "%d/%b/%Y:%H:%M:%S")
+mydate
+
+# transforming times that are not represented by a formatted version
+mydates <- c("20060515 112504.5", "20060518 101000.3", "20060520 20035.1")
+dtparts <- t(as.data.frame(strsplit(mydates, " ")))
+dtimes <- strptime(dtparts[, 1], format = "%Y%m%d")
+as.numeric(dtparts[, 2])
+dtimes
+
+# using ISOdate
+ISOdate(2006, 5, 16, 7, 15, 04, tz = "PDT")
+
+# formatting dates for output
+thedate <- ISOdate(2005, 10, 21, 18, 47, 22, tz = "PDT")
+format(thedate, "%A, %B %d, %Y %H:%M:%S")
+
+# extracting components of POSIX
+mydate <- as.POSIXlt("2005-4-19 7:01:00")
+names(mydate)
+mydate$mday
+
+# operations with dates
+b1 <- ISOdate(1977, 7, 13)
+b2 <- ISOdate(2003, 8, 14)
+b2 - b1
+difftime(b2, b1, units = "weeks")
+
+# rdates <- scan(what = "")
+# save(rdates, file = "input/rdates.RData")
+load("input/rdates.RData")
+
+rdates <- as.data.frame(matrix(rdates, ncol = 2, byrow = TRUE))
+rdates[, 2] <- as.Date(rdates[, 2], format = "%d%b%Y")
+names(rdates) <- c("Release", "Date")
+rdates
+mean(rdates$Date)
+range(rdates$Date)
+rdates$Date[11] - rdates$Date[1]
+
+ydiff <- (b2 - b1) / 365.25
+ydiff
+attr(ydiff, "units") <- "years"
+ydiff
+
+# time sequences
+seq(as.Date("1976-7-4"), by = "days", length = 10)
+seq(as.Date("2000-6-1"), to = as.Date("2000-8-1"), by = "2 weeks")
+
+# extracting parts of dates
+table(format(rdates$Date, "%A"))
+
+# converting dates to factors
+fdate <- factor(format(rdates$Date, "%Y"))
+fdate
+```
+
+## Tidyverse
+
+In R, as in most programming languages, there’s a difference between a character string that looks like a date – “2019-06-21” or “June 21, 2019” – and an actual date object with specific methods (class-specific functions) hat only work on dates. A date object can print out as “2019-06-21”, but its behavior will be different from the string version that also prints out as “2019-06-21”. For example, "2019-06-21" + 1 throws an error if “2019-06-21" is a character string, but will return “2019-06-22” for a date. __lubridate__ is yet another __tidyverse__ package, that makes dealing with dates or durations (and intervals) as painless as possible.
+
+There are several helpful functions included in __lubridate__ to convert columns to dates. For instance if the column you want to convert is of the form “2012-11-21”, then you would use the function `ymd()`, for “year-month-day”. If, however the column is “2012-21-11”, then you would use `ydm()`. There’s a few of these helper functions, and they can handle a lot of different formats for dates. But you have to be careful with leap years. When a year is not a leap year, the computation returns NA. The same goes for months with a different number of days. The way to solve these issues is to use the special `%m+%` infix operator.
+
+```{r}
+fechas <- c("1999/12/31", "2000/01/07", "2005/05/20", "2010/03/25")
+
+# converting strings to dates
+fechas <- ymd(fechas)
+class(fechas)
+
+# extracting years
+year(fechas)
+
+# extracting months
+month(fechas)
+month(fechas, label = TRUE)
+
+# weekdays
+wday(fechas)
+wday(fechas, label = TRUE)
+
+# week
+week(fechas)
+
+# semester
+semester(fechas)
+
+# changing system defaults
+sys_time_old <- Sys.getlocale("LC_TIME")
+Sys.setlocale("LC_TIME", "Spanish.UTF-8")
+month(fechas, label = TRUE)
+Sys.setlocale("LC_TIME", sys_time_old)
+
+# figuring out differences between dates
+diff(fechas)
+difftime(fechas[3], fechas[1], units = "weeks")
+
+# sequence
+seq(fechas[1], fechas[2], "day")
+seq(fechas[1], fechas[3], "year")
+
+# rounding dates
+round_date(fechas, "month")
+round_date(fechas, "year")
+
+# time
+llegada <- ymd_hms("2011-06-04 12:25:00", tz = "Europe/Berlin")
+salida <- ymd_hms("2011-06-05 14:45:00", tz = "Europe/Berlin")
+llegada
+salida
+minute(llegada)
+with_tz(llegada, "America/Santiago")
+
+independence <- readRDS("input/independence.rds")
+
+# converting variables to date objects
+independence <- independence %>%
+  mutate(independence_date = lubridate::dmy(independence_date))
+
+df_month <- data.frame(month = 1:12, year = 2000, ta = rnorm(12, 15, 2))
+mutate(df_month, date = make_date(year, month))
+
+# data manipulation with lubridate and dplyr
+independence %>%
+  filter(year(independence_date) <= 1960) %>%
+  pull(country)
+
+independence %>%
+  filter(lubridate::month(independence_date) == 12,
+         lubridate::day(independence_date) == 24) %>%
+  pull(country)
+
+independence %>%
+  mutate(today = lubridate::today()) %>%
+  mutate(independent_since = lubridate::interval(independence_date, today)) %>%
+  select(country, independent_since)
+
+independence %>%
+  mutate(today = lubridate::today()) %>%
+  mutate(independent_since = lubridate::interval(independence_date, today)) %>%
+  select(country, independent_since) %>%
+  mutate(years_independent = as.numeric(independent_since, "years"))
+
+independence %>%
+  filter(colonial_power %in% c("Belgium", "France", "Portugal", "United Kingdom")) %>%
+  mutate(today = lubridate::today()) %>%
+  mutate(independent_since = lubridate::interval(independence_date, today)) %>%
+  mutate(years_independent = as.numeric(independent_since, "years")) %>%
+  group_by(colonial_power) %>%
+  dplyr::summarise(last_colony_independent_for = min(years_independent, na.rm = TRUE))
+
+# arithmetic with dates
+lubridate::ymd("2018-12-31") + 16
+lubridate::ymd("2018-12-31") + lubridate::days(16)
+lubridate::ymd("2018-12-31") + lubridate::years(1)
+
+# leap years
+lubridate::ymd("2016-02-29") + lubridate::years(1)
+lubridate::ymd("2016-02-29") %m+% lubridate::years(1)
+ymd("2018-12-31") %m+% months(2)
 ```
 # Linting
 
