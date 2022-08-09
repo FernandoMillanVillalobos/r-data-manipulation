@@ -2269,30 +2269,30 @@ There are several helpful functions included in __lubridate__ to convert columns
 fechas <- c("1999/12/31", "2000/01/07", "2005/05/20", "2010/03/25")
 
 # converting strings to dates
-fechas <- ymd(fechas)
+fechas <- lubridate::ymd(fechas)
 class(fechas)
 
 # extracting years
-year(fechas)
+lubridate::year(fechas)
 
 # extracting months
-month(fechas)
-month(fechas, label = TRUE)
+lubridate::month(fechas)
+lubridate::month(fechas, label = TRUE)
 
 # weekdays
-wday(fechas)
-wday(fechas, label = TRUE)
+lubridate::wday(fechas)
+lubridate::wday(fechas, label = TRUE)
 
 # week
-week(fechas)
+lubridate::week(fechas)
 
 # semester
-semester(fechas)
+lubridate::semester(fechas)
 
 # changing system defaults
 sys_time_old <- Sys.getlocale("LC_TIME")
 Sys.setlocale("LC_TIME", "Spanish.UTF-8")
-month(fechas, label = TRUE)
+lubridate::month(fechas, label = TRUE)
 Sys.setlocale("LC_TIME", sys_time_old)
 
 # figuring out differences between dates
@@ -2304,16 +2304,16 @@ seq(fechas[1], fechas[2], "day")
 seq(fechas[1], fechas[3], "year")
 
 # rounding dates
-round_date(fechas, "month")
-round_date(fechas, "year")
+lubridate::round_date(fechas, "month")
+lubridate::round_date(fechas, "year")
 
 # time
-llegada <- ymd_hms("2011-06-04 12:25:00", tz = "Europe/Berlin")
-salida <- ymd_hms("2011-06-05 14:45:00", tz = "Europe/Berlin")
+llegada <- lubridate::ymd_hms("2011-06-04 12:25:00", tz = "Europe/Berlin")
+salida <- lubridate::ymd_hms("2011-06-05 14:45:00", tz = "Europe/Berlin")
 llegada
 salida
-minute(llegada)
-with_tz(llegada, "America/Santiago")
+lubridate::minute(llegada)
+lubridate::with_tz(llegada, "America/Santiago")
 
 independence <- readRDS("input/independence.rds")
 
@@ -2322,7 +2322,7 @@ independence <- independence %>%
   mutate(independence_date = lubridate::dmy(independence_date))
 
 df_month <- data.frame(month = 1:12, year = 2000, ta = rnorm(12, 15, 2))
-mutate(df_month, date = make_date(year, month))
+dplyr::mutate(df_month, date = lubridate::make_date(year, month))
 
 # data manipulation with lubridate and dplyr
 independence %>%
@@ -2359,8 +2359,9 @@ lubridate::ymd("2018-12-31") + lubridate::days(16)
 lubridate::ymd("2018-12-31") + lubridate::years(1)
 
 # leap years
+library("lubridate")
 lubridate::ymd("2016-02-29") + lubridate::years(1)
-lubridate::ymd("2016-02-29") %m+% lubridate::years(1)
+ymd("2016-02-29") %m+% years(1)
 ymd("2018-12-31") %m+% months(2)
 ```
 # Linting
