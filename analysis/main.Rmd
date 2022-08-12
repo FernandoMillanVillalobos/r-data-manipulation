@@ -2127,6 +2127,7 @@ gss_cat %>%
   geom_col(aes(y = n, x = marital)) +
   coord_flip()
 ```
+
 # Dates and Times
 
 ## Base-R
@@ -2151,7 +2152,8 @@ If your input date/times are stored as the number of seconds from January 1, 197
 
 The `POSIX` date/time classes take advantage of the POSIX date/time implementation of your operating system, allowing dates and times in R to be manipulated in the same way they would be in, for example, a C program. The two most important functions in this regard are `strptime`, for inputting dates, and `strftime`, for formatting dates for output. Both of these functions use a variety of formatting codes. Nonformat characters (like the slashes) are interpreted literally. When using `strptime`, an optional time zone can be specified with the `tz=` option.
 
-![Format codes for strftime and strptime](input/img/format-codes-str.png)
+<!-- ![Format codes for strftime and strptime](input/img/format-codes-str.png) -->
+
 Since `POSIX` date/time values are stored internally as the number of seconds since January 1, 1970, they can easily use times that are not represented by a formatted version of the hour, minute, and second. Another way to create POSIX dates is to pass the individual components of the time to the `ISOdate` function. `ISOdate` will accept both numeric and character arguments.
 
 For formatting dates for output, the format function will recognize the type of your input date, and perform any necessary conversions before calling `strftime`, so `strftime` rarely needs to be called directly.
@@ -2363,6 +2365,222 @@ library("lubridate")
 lubridate::ymd("2016-02-29") + lubridate::years(1)
 ymd("2016-02-29") %m+% years(1)
 ymd("2018-12-31") %m+% months(2)
+```
+# Data aggregation
+
+## Base-R
+
+R provides a wide array of functions to aid in aggregating data. For simple tabulation and cross-tabulation, the `table` function is available. For more complex tasks, the available functions can be broken down into two groups: those that are designed to work effectively with arrays and/or lists, like `apply`, `sweep`, `mapply`, `sapply`, and `lapply`, and those that are oriented toward data frames (like `aggregate` and `by`). There is considerable overlap between the two tools, and the output of one can be converted to the equivalent of the output from another, so often the choice of an appropriate function is a matter of personal taste.
+
+The arguments to the `table` function can either be individual vectors representing the levels of interest, or a list or data frame composed of such vectors. The __result from table will always be an array of as many dimensions as the number of vectors being tabulated__, with `dimnames` extracted from the levels of the cross-tabulated variables. By default, `table` will not include missing values in its output; to override this, use the `exclude=NULL` argument. When passed a single vector of values, table returns an object of class table, which can be treated as a named vector. For simple queries regarding individual levels of a tabulated variable, this may be the most convenient form of displaying and storing the values. Alternatively, the output from `table` can be converted to a data frame using
+`as.data.frame`. When multiple vectors are passed to `table`, an array of as many dimensions as there are vectors is returned.
+
+When passed a data frame, `table` treats each column as a separate variable, resulting in a table that effectively counts how often each row appears in the data frame. This can be especially useful when the result of table is passed to `as.data.frame`, since its form will be similar to the input data frame. Since the data frame was formed from a `table`, all possible combinations, including those with no observations, are included.
+
+Sometimes it is helpful to display __the margins of a table__, that is, the sum of each row and/or column, in order to understand differences among the levels of the variables from which the table was formed. The `addmargins` function accepts a table and returns a similar table, with the requested margins added. To specify which dimensions should have margins added, the `margin=` argument accepts a vector of dimensions; a value of 1 in this vector means a new row with the margins for the columns will be added, and a value of 2 corresponds to a new column containing row margins. The default operation to create the margins is to use the `sum` function. If some other function is desired, it can be specified through the `FUN=` argument. When a margin is added, the `dimnames` for the table are adjusted to include a description of the margin.
+
+When it’s desired to have a table of proportions instead of counts, one strategy would be to use the `sweep` function dividing each row and column by its corresponding margin. The `prop.table` function provides a convenient wrapper around this operation. `prop.table` accepts a table, and a margin= argument, and returns a table of proportions. With no value specified for `margin=`, the sum of all the cells in the table will be 1; with `margin=1`, each row of the resulting table will add to 1, and with `margin=2`, each column will add to 1. 
+
+For tables with more than two dimensions, it may be useful to present the table in a “flattened” form using the `ftable` function. The `xtabs` function can produce similar results to the `table` function, but uses the formula language interface. If a variable is given on the left-hand side of the tilde (`~`), it is interpreted as a vector of counts corresponding to the values of the variables on the right-hand side, making it very easy to convert already tabulated data into R’s notion of a table.
+
+When confronted with an aggregation problem, there are three main considerations:
+
+1. How are the groups that divide the data defined?
+2. What is the nature of the data to be operated on?
+3. What is the desired end result?
+
+Thinking about these issues will help to point you to the most effective solution for your needs. The following paragraphs should help you make the best choice. 
+
+_Groups defined as list elements_. If the groups you’re interested in are already organized as elements of a list, then `sapply` or `lapply` are the appropriate functions; they differ in that `lapply` always returns a list, while `sapply` may simplify its output into a vector or array if appropriate. This is a very flexible approach, since the entire data frame for each group is available. Sometimes, if other methods are inappropriate, you can first use the split function to create a suitable list for use with `sapply` or `lapply`.
+
+_Groups defined by rows or columns of a matrix_. When the goal is to operate on each column or row of a matrix, the `apply` function is the logical choice. `apply` will usually return its results as a vector or array, but will return a list if the results of operating on the rows or columns are of different dimensions.
+
+_Groups based on one or more grouping variables_. A wide array of choices is available for the very common task of operating on subsets of data based on the value of a grouping variable. If the computations you desire each involve only a single vector and produce a single scalar as a result (like calculating a scalar-valued statistic for a variable or set of variables), the `aggregate` function is the most likely choice. Since `aggregate` always returns a data frame, it is especially useful if the desired result is to create a plot or fit a statistical model to the aggregated data.
+
+If your computations involve a single vector, but the result is a vector (for example, a set of quantiles or a vector of different statistics), `tapply` is one available option. Unlike `aggregate`, `tapply` returns its results in a vector or array for which individual elements are easy to access but may produce a difficult-to-interpret display for complex problems. Another approach to the problem is provided by the __reshape__ package, available through CRAN, It uses a formula interface, and can produce output in a variety of forms. When the desired result requires access to more than one variable at a time (for example, calculating a correlation matrix, or creating a scatter plot), row indices can be passed to `tapply` to extract the appropriate rows corresponding to each group. Alternatively, the `by` function can be used. Unlike `tapply`, the special list returned by by has a print method which will always produce an easily-readable display of the aggregation, but accessing individual elements of the returned list may be inconvenient. Naturally, for tasks like plotting, there is no clear reason to choose one approach over the other.
+
+As mentioned previously, using split and `sapply/lapply` is a good solution if you find that other methods don’t provide the flexibility you need. Finally, if nothing else seems to work, you can write a loop to iterate over the values returned by unique or intersection, and perform whatever operations you desire. If you take this route, make sure to consider the issues about memory management in loops.
+
+Although most functions in R will automatically operate on each element of a vector, the same is not true for lists. Since many R functions return lists, it’s often useful to process each list element in the same way that R naturally does for vectors. To handle situations like this, R provides two functions: `lapply` and `sapply.` Each of these functions takes a list or vector as its first argument, and a function to be applied to each element as its second argument. The difference between the two functions is that `lapply` will always return its result as a list, while `sapply` will simplify its output to a vector or matrix if possible. Another important use of `sapply` relates to data frames. When treated as a list, each column of a data frame retains its mode and class. To get this information from a data frame `sapply` can be used. When the structure of the data would be lost if `sapply` tried to simplify it into a vector or array. This same idea can be used to extract columns of a data frame that meet a particular condition. `sapply` or `lapply` can be used as an alternative to loops for performing repetitive tasks. When you use these functions, they take care of the details of deciding on the appropriate form of the output, and eliminate the need to incrementally build up a vector or matrix to store the result.
+
+When your data has the added organization of an array, R provides a convenient way to operate on each dimension of the data through the `apply` function. This function requires three arguments: the array on which to perform the operation, an index telling apply which dimension to operate on, and the function to use. Like `sapply`, additional arguments to the function can be placed at the end of the argument list. For matrices, a second argument of 1 means “operate on the rows”, and 2 means “operate on the columns”. One common use of `apply` is in conjunction with functions like `scale`, which require summary statistics calculated for each column of a matrix. Without additional arguments, the `scale` function will subtract the mean of each column and divide by the standard deviation, resulting in a matrix of zscores. To use other statistics, appropriate vectors of values can be calculated using `apply` and provided to scale using the `center=` and `scale=` arguments. Similar to `sapply`, `apply` will try to return its results in a vector or matrix when appropriate, making it useful in cases where several quantities need to be calculated for each row or column of a matrix. `apply` will use names that are present in the input matrix or data frame to properly label the result that it returns. If a vector needs to be processed in non-overlapping groups, it is sometimes easiest to temporarily treat the vector as a matrix, and use `apply` to operate on the groups.
+
+The `apply` function is very general, and for certain applications, there may be more efficient methods available to perform the necessary computations. For example, if the statistic to be calculated is the sum or the mean, matrix computations will be more efficient than calling `apply` with the appropriate function. In cases like this, the `rowSums`, `colSums`, `rowMeans`, or functions can be used. Each of these functions accepts a matrix (or a data frame which will be coerced to a matrix), and an optional `na.rm=` argument to specify the handling of missing values. Since these functions will accept logical values as input as well as numeric values, they can be very useful for counting operations.
+
+A common situation when processing a matrix by rows or columns is that each row or column needs to be processed differently, based on the values of an auxiliary vector which already exists. In cases like this, the `sweep` function can be used. Like `apply`, the first two arguments to sweep are the matrix to be operated on and the index of the dimension to be used for repetitive processing. In addition, `sweep` takes a third argument representing the vector to be used when processing each column, and finally a fourth argument providing the function to be used. `sweep` operates by building matrices which can be operated on in a single call, so, unlike `apply`, only functions which can operate on arrays of values can be passed to `sweep.` All of the built-in binary operators, such as addition ("`+`"), subtraction ("`-`"), multiplication ("`*`"), and division ("`/`") can be used, but, in general, it will be necessary to make sure an arbitrary function will work properly with `sweep`.
+
+To calculate scalar data summaries of one or more columns of a data frame or matrix, the `aggregate` function can be used. Although this function is limited to returning scalar values, it can operate on multiple columns of its input argument, making it a natural choice for data summaries for multiple variables. The first argument to `aggregate` is a data frame or matrix containing the variables to be summarized, the second argument is a list containing the variables to be used for grouping, and the third argument is the function to be used to summarize the data. Since the second argument must be a list, when a data frame is being processed it is often convenient to refer to the grouping columns using single bracket subscripts, since columns accessed this way will naturally be in the form of a list. In addition, with more than one grouping variable, specifying the columns this way will insure that the grouping variables’ names will be automatically transferred to the output data frame. If the columns are passed as manually constructed list, aggregate will use names like Group.1 to identify the grouping variables, unless names are provided for the list elements.
+
+To process a single vector based on the values of one or more grouping vectors, the `tapply` function can also be used. The returned value from `tapply` will be an array with as many dimensions as there were vectors that defined the groups. Unlike `aggregate`, `tapply` is not limited to returning scalars. To convert values like this to data frames, the `dimnames` of the returned object can be combined with the values. When each element of the vector is of the same length, this operation is fairly straightforward, but the problem becomes difficult when the return values are of different lengths. When more than one grouping variable is used with `tapply`, and the return value from the function used is not a scalar, the returned object is somewhat more difficult to interpret.
+
+The `by` function generalizes the idea of `tapply` to operate on entire data frames broken down by a list of grouping variables. Thus, the first argument to `by` is a data frame, and the remaining arguments are similar to those of `tapply`. Each of the rows returned by the `by` function is in the form that we would like for a data frame containing these results, so it would be natural to use `rbind` to convert this result to a data frame; however, it is tedious to pass each row to the `rbind` function individually. In cases like this, the `do.call` function can usually generalize the operation so that it will be carried out properly regardless of how many elements need to be processed. `do.call` takes a list of arguments and passes them to a function as if they were the argument list for the function call.
+
+An alternative approach to aggregation is provided by the __reshape__ package, available from CRAN. The functions in this package provide a unified approach to aggregation, based on an extended formula notation. The core idea behind the __reshape__ package is to create a “melted” version of a dataset (through the `melt` function), which can then be “cast” (with the `cast` function) into an object with the desired orientation. To melt a data frame, list, or array into the appropriate melted form, it is first necessary to divide the variables into id variables and measure or analysis variables; this should generally be obvious from the nature of the data. By default, melt treats factor and integer variables as id variables, and the remaining variables as analysis variables; if your data is structured according to this convention, no additional information needs to be provided to melt. Otherwise, the `id.var=` or `measure.var=` arguments can be used; if you specify one, it will assume all the other variables are of the other type. Once a dataset is melted, it can be cast into a variety of forms. Notice that `melt` displays the names of variables that have been automatically assigned as id variables. The basic melting operation preserves the id variables, and converts the measured variables into two columns named `variable` (which identifies which variable is being measured) and `value` (which contains the actual values). You can use a name other than variable by specifying a variable `name=` argument to melt. The left-hand side of the formula passed to cast represents the variable(s) which will appear in the columns of the result, and the right-hand side describes the variables which will appear in the rows. Formulas used by cast can include a single dot (`.`) to represent an overall summary, or three dots `...` to represent all variables not otherwise included in the formula. When used for aggregation, an aggregation function should be supplied; if not it defers to using `length`. To limit the variables that are used, we can use the `subset=` argument of cast. Since this argument uses the melted data, we need to refer to the variable named variable. A list of functions can be provided to `cast` function. To provide added flexibility, the vertical bar (`|`) can be used to cause cast to produce a list instead of a data frame. The default behavior of `cast` is to only include combinations actually encountered in the data. To include all possible combinations, use the `add.missing=TRUE` argument. In each of the preceding examples, the dataset was first melted, then repeated calls to cast were carried out. If only a single call to cast is needed, the `recast` function combines the melt and cast steps into a single call.
+
+```{r}
+pets <- c("dog", "cat", "duck", "chicken", "duck", "cat", "dog")
+tt <- table(pets)
+tt
+tt["cat"]
+
+# converting output from table to a data frame
+as.data.frame(tt)
+
+# passing multiple vectors to table
+hiinc <- state.x77[, "Income"] > median(state.x77[, "Income"])
+stateinc <- table(state.region, hiinc)
+stateinc
+as.data.frame(stateinc)
+
+# passing a data frame to table and converting it back to a data frame
+x <- data.frame(a = c(1, 2, 2, 1, 2, 2, 1), b = c(1, 2, 2, 1, 1, 2, 1), c = c(1, 1, 2, 1, 2, 2, 1))
+x
+as.data.frame(table(x))
+
+# adding margins
+tt <- table(infert$education, infert$parity)
+tt
+
+# adding a row of margins
+tt1 <- addmargins(tt, 1)
+tt1
+
+# adding margins to both rows and columns
+tt12 <- addmargins(tt, c(1, 2))
+tt12
+
+# getting proportions
+prop.table(tt, 2)
+
+# multidimensional table
+ftable(UCBAdmissions)
+
+# using xtabs
+xtabs(~ state.region + hiinc)
+x <- data.frame(a = c(1, 2, 2, 1, 2, 2, 1), b = c(1, 2, 2, 1, 1, 2, 1), c = c(1, 1, 2, 1, 2, 2, 1))
+dfx <- as.data.frame(table(x))
+xtabs(Freq ~ a + b + c, data = dfx)
+
+# mapping a Function to a Vector or List
+text <- c("R is a free environment for statistical analysis", "It compiles and runs on a variety of platforms", "Visit the R home page for more information")
+result <- strsplit(text, " ")
+result
+
+# reports the number of elements in the returned list (3)
+length(result)
+# finding out the length of the individual elements of the list (words)
+nwords <- sapply(result, length)
+nwords
+
+# getting mode and class from a data frame with sapply()
+class(ChickWeight)
+sapply(ChickWeight, class)
+
+# extracting columns of a data frame that meet a particular condition (numeric) with sapply()
+df <- ChickWeight[, sapply(ChickWeight, class) == "numeric"]
+df
+
+# a more complex example of using sapply()
+maxcor <- function(i, n = 10, m = 5) { # since sapply will always pass an argument to the applied function, a dummy argument (i) is added to the function.
+  mat <- matrix(rnorm(n * m), n, m)
+  corr <- cor(mat)
+  diag(corr) <- NA
+  max(corr, na.rm = TRUE)
+}
+maxcors <- sapply(1:1000, maxcor, n = 100)
+mean(maxcors)
+
+# using apply()
+sstate <- scale(state.x77, center = apply(state.x77, 2, median), scale = apply(state.x77, 2, mad))
+sstate
+
+# another example
+summfun <- function(x) c(n = sum(!is.na(x)), mean = mean(x), sd = sd(x))
+x <- apply(state.x77, 2, summfun)
+t(x)
+
+# apply() for non-overlapping groups
+x <- 1:12
+apply(matrix(x, ncol = 3, byrow = TRUE), 1, sum) # first need to be converted into a matrix
+
+# specific statistics calculation without apply()
+mns <- colMeans(USJudgeRatings)
+mns
+jscore <- rowSums(USJudgeRatings >= 8)
+head(jscore)
+
+# using sweep()
+maxes <- apply(state.x77, 2, max)
+swept <- sweep(state.x77, 2, maxes, "/")
+head(swept)
+
+# non-working sweep() example
+# right way to proceed
+meds <- apply(state.x77, 2, median)
+meanmed <- function(var, med) mean(var[var > med])
+meanmed(state.x77[, 1], meds[1]) # for every col
+meanmed(state.x77[, 2], meds[2])
+
+# opposite to using sweep()  -> doesn´t work! returns only a single value
+sweep(state.x77, 2, meds, meanmed)
+
+# solution via mapply()
+mapply(meanmed, as.data.frame(state.x77), meds)
+
+# mapping a function based on groups
+aggregate(iris[-5], iris[5], mean)
+
+weights <- aggregate(ChickWeight$weight, ChickWeight[c("Time", "Diet")], mean)
+# or
+# weights <- aggregate(ChickWeight$weight, list(Time = ChickWeight$Time, Diet = ChickWeight$Diet), mean)
+weights
+
+# a single vector based on the values or one or more grouping vectors using tapply()
+maxweight <- tapply(PlantGrowth$weight, PlantGrowth$group, max)
+as.data.frame(as.table(maxweight), responseName = "MaxWeight")
+ranges <- tapply(PlantGrowth$weight, PlantGrowth$group, range)
+ranges
+# converting the results to a data frame
+data.frame(group = dimnames(ranges)[[1]], matrix(unlist(ranges), ncol = 2, byrow = TRUE))
+
+# using more than one grouping variable with tapply() and the returned value is NOT a scalar
+ranges1 <- tapply(CO2$uptake, CO2[c("Type", "Treatment")], range)
+data.frame(expand.grid(dimnames(ranges1)), matrix(unlist(ranges1), byrow = TRUE, ncol = 2))
+
+# using by()
+sumfun <- function(x) data.frame(n = length(x$uptake), mean = mean(x$uptake), sd = sd(x$uptake))
+bb <- by(CO2, CO2[c("Type", "Treatment")], sumfun)
+bb
+cbind(expand.grid(dimnames(bb)), do.call(rbind, bb))
+
+states <- data.frame(state.x77, state = row.names(state.x77), region = state.region, row.names = 1:50)
+head(states)
+mstates <- reshape::melt(states)
+head(mstates)
+reshape::cast(mstates, region ~ variable, mean)
+reshape::cast(mstates, variable ~ region, mean)
+reshape::cast(mstates, region ~ variable, mean, subset = variable %in% c("Population", "Life.Exp"))
+reshape::cast(mstates, . ~ variable, c(mean, median, sd), subset = variable %in% c("Population", "Life.Exp"))
+# or
+# reshape::cast(mstates, variable ~ ., c(mean, median, sd), subset = variable %in% c("Population", "Life.Exp"))
+# using a grouping variable
+reshape::cast(mstates, region ~ variable, c(mean, median, sd), subset = variable %in% c("Population", "Life.Exp")) # data frame
+reshape::cast(mstates, variable ~ . | region, c(mean, median, sd), subset = variable %in% c("Population", "Life.Exp")) # list
+
+# another example
+mChick <- reshape::melt(ChickWeight, measure.var = "weight")
+head(reshape::cast(mChick, Diet + Time ~ variable, median))
+reshape::cast(mChick, Diet ~ Time + variable, mean)
+reshape::cast(mChick, Time ~ variable | Diet, mean)
+
+# including all possible combinations
+xChickWeight <- subset(ChickWeight, !(Diet == 1 & Time == 4))
+mxChick <- reshape::melt(xChickWeight, measure.var = "weight")
+head(reshape::cast(mxChick, Diet + Time ~ variable, median))
+head(reshape::cast(mxChick, Diet + Time ~ variable, median, add.missing = TRUE))
+
+# using recast()
+head(reshape::recast(xChickWeight, measure.var = "weight", Diet + Time ~ variable, median, add.missing = TRUE))
 ```
 # Linting
 
