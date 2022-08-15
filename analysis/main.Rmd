@@ -1729,10 +1729,7 @@ aq %>% filter(
   Temp > 90,
   Month == 6
 )
-aq %>% filter(between(
-  Temp,
-  80, 90
-))
+aq %>% filter(dplyr::between(Temp, 70, 90))
 aq %>% top_n(5, Temp)
 aq %>% distinct # removing duplicate rows
 aq %>% drop_na # removing rows with missing data
@@ -2719,6 +2716,7 @@ The argument `wt` stands for weighted counts. While count calculates the frequen
 
 ```{r}
 # loading the data
+data(Gasoline, package = "plm")
 gasoline <- as_tibble(Gasoline)
 gasoline <- gasoline %>%
   mutate(country = tolower(country))
