@@ -164,6 +164,7 @@ library(skimr)
 library(gapminder)
 library(lsr)
 library(chron)
+library(plm)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -889,6 +890,17 @@ En lugar de encapsular y encadenar `ifelse()`, podemos usar la función `case_wh
 
 Nuestro conjunto de datos contiene datos diarios desde el 1 de enero de 1980 hasta el 31 de diciembre de 2015. Así que únicamente debemos crear un vector con fechas de este periodo. En la función `complete()` indicamos la columna que queremos completar y le asignamos el vector entero de fechas. El resultado es un nuevo `data.frame` con todas las fechas, rellenando el resto de columnas con NA.
 
+The `extract` function is basically the separate function with super powers and works with groups instead of separators. The `separate` function allows you to split a character variable into multiple variables. The key difference between `separate` and `extract` is that `extract` works with groups within its regular expressions. Each captured group is converted into a new column. So instead of thinking of the separator in separate with `extract`, we think of groups. `extract` takes a few arguments:
+
+- _col_ specifies the character column to be split into several columns.
+- _into_ specifies the name of the columns to be created
+- _regex_ defines the regular expression in which we capture the groups that will represent the new columns
+- _remove_ tells the function if the original column should be removed (by default TRUE)
+
+To extract columns that are more complicated and confusing, we need to learn the concept of __non-grouping parentheses__. Non-grouping parentheses define groups that are not captured. In other words, these groups are not converted into a new column. A non-grouping parenthesis is defined by a group that starts with a question mark and a colon: (`?:`). The advantage of this method is that we can solve column separation problems caused by messy or inconsistent variables.
+
+![Regular Expressions](input/img/regular-expressions-cheat-sheet-v2.pdf) 
+
 ```{r}
 ta_vigo <- read_csv( "input/TG_STAID001395.txt", skip = 20)
 head(ta_vigo)
@@ -933,6 +945,119 @@ date_ts <- seq(lubridate::ymd("1980-01-01"), lubridate::ymd("2015-12-31"), "day"
 # using complete()
 data_vigo_subset <- complete(data_vigo_subset, date = date_ts)
 head(data_vigo_subset)
+
+# using extract()
+# example with separate()
+tibble(
+  variable = c("a-b", "a-d", "b-c", "d-e")
+) %>%
+  separate(
+    variable,
+    into = c("a", "b"),
+    sep = "-",
+    remove = FALSE
+  )
+
+# with extract
+tibble(
+  variable = c("a-b", "a-d", "b-c", "d-e")
+) %>%
+  extract(
+    col = variable,
+    into = c("a", "b"),
+    regex = "([a-z])-([a-z])",
+    remove = FALSE
+  )
+
+# without separator
+tibble(
+  variable = c("x1", "x2", "y1", "y2")
+) %>%
+  extract(
+    variable,
+    into = c("letter", "number"),
+    regex = "([xy])(\\d)",
+    remove = FALSE
+  )
+
+tibble(
+  variable = c(
+    "David Jude Heyworth Law", "Elton Hercules John",
+    "Angelina Jolie Voight", "Jennifer Shrader Lawrence"
+  )
+) %>%
+  extract(
+    variable,
+    into = c("short name", "remainder"),
+    regex = "(\\w+) .* (\\w+)",
+    remove = FALSE
+  )
+
+# extracting from non-grouping parentheses
+tibble(
+  variable = c(
+    "x -> 1",
+    "y -> 2",
+    "p-> 34"
+  )
+) %>%
+  extract(
+    variable,
+    into = c("letter", "number"),
+    remove = FALSE,
+    regex = "([a-z])(?: ?-> ?)(\\d+)?"
+  )
+
+# another example
+df <- tibble(
+  variable = c(
+    "x ->-> 1",
+    "y -> 2",
+    "p-> 34",
+    "f 4"
+  )
+)
+
+df %>%
+  extract(
+    variable,
+    into = c("letter", "number"),
+    remove = FALSE,
+    regex = "([a-z]) ?(?:->){0,} ?(\\d+)?"
+  )
+
+# another one
+df <- tibble(
+  variable = c(
+    "x ->aslkdfj 1", "y-> 2",
+    "p 34",
+    "8"
+  )
+)
+
+df %>%
+  extract(
+    variable,
+    into = c("letter", "number"),
+    remove = FALSE,
+    regex = "([a-z])? ?(?:->\\w*)? ?(\\d+)"
+  )
+
+# last example
+tibble(
+  value = c(
+    "3.10 = AX",
+    "3.1345 = AX:?_40",
+    "3.8983 =:$15",
+    ".873 = PFS:4"
+  )
+) %>%
+  extract(
+    value,
+    into = c("v0", "v2", "v3", "v4"),
+    regex = "(\\d)?\\.(\\d+) ?= ?(?:(\\w+)?:?)?(?:[?_$]*)(\\d+)?",
+    remove = FALSE
+  )
 ```
 
 ## Packages
@@ -2581,6 +2706,137 @@ head(reshape::cast(mxChick, Diet + Time ~ variable, median, add.missing = TRUE))
 
 # using recast()
 head(reshape::recast(xChickWeight, measure.var = "weight", Diet + Time ~ variable, median, add.missing = TRUE))
+```
+## Tidyverse
+
+`group_by()` is a very useful verb; as the name implies, it allows you to create groups and then, for example, compute descriptive statistics by groups. Once your data is grouped, the operations that will follow will be executed inside each group.
+
+Counting is one of the most common tasks you do when working with data. Counting may sound simple, but it can get complicated quickly. Intuitively, one would think that the count function counts the values of discrete variables: The number of players on a team, the number of cars, etc. However, `count` can also be used to calculate the sum of a variable for a particular group or groups. `count` creates a new data frame with the grouping variable and the frequency or sum variable. This is not always what you want. Sometimes you want to add counts to your existing data frame.
+
+The argument `wt` stands for weighted counts. While count calculates the frequency of values within a group without specifying the `wt` argument (`n = n()`), __`wt` calculates the sum of a continuous variable for certain groups (`n = sum(<VARIABLE>)`)__. This technique has its advantages and disadvantages. On the positive side, we only need three lines of code instead of six. On the downside, the code is less explicit, and without knowing the inner workings of count, it’s hard to tell that the function is calculating sums.
+
+`add_tally()` does something similar than `add_count()`. The only difference is that `add_tally` calculates the sum of a given variable instead of a count. `add_tally` has no argument for grouping the data. You must accomplish this with `group_by`. 
+
+```{r}
+# loading the data
+gasoline <- as_tibble(Gasoline)
+gasoline <- gasoline %>%
+  mutate(country = tolower(country))
+
+# group_by()
+gasoline %>%
+  group_by(country)
+
+gasoline %>%
+  group_by(country, year)
+
+gasoline %>%
+  group_by(country, year) %>% 
+  ungroup()
+
+# getting summary statistics
+gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(mean_gaspcar = mean(lgaspcar))
+
+gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(mean_gaspcar = mean(lgaspcar)) %>%
+  filter(country == "france")
+
+desc_gasoline <- gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(
+    mean_gaspcar = mean(lgaspcar),
+    sd_gaspcar = sd(lgaspcar),
+    max_gaspcar = max(lgaspcar),
+    min_gaspcar = min(lgaspcar)
+  )
+
+desc_gasoline %>%
+  filter(max(mean_gaspcar) == mean_gaspcar)
+
+desc_gasoline %>%
+  filter(min(mean_gaspcar) == mean_gaspcar)
+
+# group_by() and across()
+gasoline <- gasoline %>%
+  mutate(
+    year = as.character(year),
+    country = as.character(country)
+  )
+
+gasoline %>%
+  group_by(across(is.character)) %>%
+  dplyr::summarise(mean(lincomep))
+
+gasoline %>%
+  group_by(across(c(1, 2))) %>%
+  dplyr::summarise(mean(lincomep))
+
+gasoline %>%
+  group_by(across(seq(1:2))) %>%
+  dplyr::summarise(mean(lincomep))
+
+# how to count with continuous variables
+starwars %>%
+  count(
+    decade = 10 * (birth_year %/% 10),
+    name = "characters_per_decade"
+  ) %>%
+  glimpse()
+
+# summarise() across many columns
+gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(across(starts_with("l"), mean))
+
+# applying several functions to many columns at once
+gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(across(starts_with("l"), tibble::lst(mean, sd, max, min), .names = "{fn}_{col}"))
+
+gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(across(dplyr::contains("car"), tibble::lst(mean, sd, max, min), .names = "{fn}_{col}"))
+
+gasoline %>%
+  group_by(country) %>%
+  dplyr::summarise(across(is.numeric, tibble::lst(mean, sd, min, max), .names = "{fn}_{col}"))
+
+gasoline %>%
+  select(-year) %>%
+  group_by(country) %>%
+  dplyr::summarise(across(everything(), tibble::lst(mean, sd, min, max), .names = "{fn}_{col}"))
+
+# creating bins for continuous variables
+starwars %>%
+  count(height_intervals = cut_width(height, 10))
+
+# calculating the sum of a variable based on groups
+# using group_by() and summarise()
+economics %>%
+  mutate(
+    year = format(date, "%Y")) %>%
+  group_by(year) %>%
+  dplyr::summarise(sum_unemploy = sum(unemploy, na.rm = TRUE))
+
+# using count()
+economics %>%
+  count(year = format(date, "%Y"), wt = unemploy, name = "sum_unemploy")
+
+# adding counts as a variable to your data frame with add_count()
+mpg %>%
+  add_count(manufacturer, name = "number_of_cars_by_manufacturer") %>%
+  select(manufacturer, model, number_of_cars_by_manufacturer) %>%
+  glimpse()
+
+# adding a new variable to your data frame that contains the sum of a specific variable
+mpg %>%
+  group_by(model) %>%
+  add_tally(wt = displ, name = "sum_display_per_model") %>%
+  select(manufacturer, model, sum_display_per_model) %>%
+  glimpse()
 ```
 # Linting
 
