@@ -165,6 +165,8 @@ library(gapminder)
 library(lsr)
 library(chron)
 library(plm)
+library(randomNames)
+library(encryptr)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -1058,6 +1060,162 @@ tibble(
     regex = "(\\d)?\\.(\\d+) ?= ?(?:(\\w+)?:?)?(?:[?_$]*)(\\d+)?",
     remove = FALSE
   )
+```
+Techniques for __anonymizing__ and __pseudoanonymizing__ columns avoid data breaches that they are potentially dangerous for those affected. For that We will find out how to use the function `fct_anon`, how to replace names with random names, how to mask values, how to group numeric variables, how to remove house numbers from street names, and how to encode and decode values.The difference between pseudonymization and anonymization is that pseudonymization is reversible, while anonymization is not.
+
+The EU defines pseudonymization as follows:
+
+“The processing of personal data in such a manner that the personal data can no longer be attributed to a specific data subject without the use of additional information provided that such additional information is kept separately and is subject to technical and organisational measures to ensure
+that the personal data are not attributed to an identified or identifiable natural person.” (https://edps.europa.eu/system/files/2021-04/21-04-27_aepdedps_ anonymisation_en_5.pdf)
+ 
+By this definition, pseudonymization is reversible and requires additional information to reverse the process.
+ 
+Sometimes you want to make your data completely anonymous so that other people can’t see sensitive information. A simple function to anonymize such discrete data is `fct_anon`. The function takes two arguments. The factor you want to anonymize, and the prefix you put in front of the anonymized factor. The numbers are generated randomly. So, each time you run this code, you will get a different set of numbers.
+
+Names are also sensitive data. To anonymize names, you can simply replace them with random names. This can be done with the `randomNames` function from the __randomNames__ package. You get a different set of names each time you run the function. If we want to be more specific about how the names are generated, we can provide some additional information to the function.
+
+Another common use case is __the masking of values__. Masking is a technique that hides some characters of a string. Mostly by “X”s. The `.x` stands for the piped variable (in this case height). Then I provide a regular expression that searches for the last character of the string (`.$`). This character should then be replaced by an X. The regular expression `^.{10}` indicates that we are looking for the first 10 characters of the string. We replace this pattern with 10 “X”s, specified by `strrep("X", 10)`. The function __strrep__ is a basic function of R, which simply repeats a series of characters.
+
+Another common technique for anonymizing data is to __divide it into groups__. With the function `cut_width` we can create groups of arbitrary width from a numeric variable. The round bracket means that a number is not included in the set. The square bracket means that a number is included in the set. The function `cut_number` creates a certain number of sets. Note, however, that the width of each group varies.
+
+Finally, we can anonymize each column by encrypting it. When we encrypt a column, we convert the values of a column into another form, which we call ciphertext. The ciphertext is not readable by humans, but it can be converted back to the original value. There are two forms of encryption. Symmetric encryption, where a single key is used to encrypt and decrypt a value, and asymmetric encryption, where two keys are used to encrypt and decrypt a value. A key is plaintext that translates between the two representations. Once you have the key in symmetric encryption, you can decrypt values. To decrypt values in asymmetric encryption, you need the public key and the private key. The public key is as it says public, so open to anyone. The private key is a key you should not share with anyone. Only when you have both, can you decrypt a value. Also, private key cannot be guessed from the public key. To add another level of security, the private key also sometimes has a passphrase (or password) to it.
+
+We can encrypt this data with the package __encryptr__. First we need to load the package and create the private and public keys using the `genkeys` function. The function prompted us to provide a passphrase for the private key. This passphrase and the private key should not be shared with anyone! Once we have the passphrase, we can encrypt our columns. To decrypt the column, we simply use the `decrypt` function. You must provide the passphrase to decrypt the column. Also, this works only if the R file is in the same directory as the public and private keys.
+
+```{r}
+levels(gss_cat$relig)
+
+# converting these levels into numeric values and add a prefix to them
+gss_cat %>%
+  mutate(
+    relig = fct_anon(relig, prefix = "religion_")
+  ) %>%
+  glimpse()
+
+# anonymizing names
+presidential %>%
+  mutate(
+    name = randomNames(nrow(.),
+      sample.with.replacement = FALSE
+    )
+  )
+
+# customizing random names
+presidential %>%
+  mutate(
+    name = randomNames(nrow(.),
+      sample.with.replacement = FALSE,
+      ethnicity = c(1, 2, 4),
+      name.order = "first.last",
+      name.sep = " "
+    )
+  )
+
+# masking values
+starwars %>%
+  mutate(
+    height = map_chr(height, ~ str_replace(.x, ".$", "X"))
+  )
+
+# masking more than one character
+ccards <- tibble(
+  creditcards = c(
+    36555224524299,
+    36350489667466,
+    36002887965170,
+    5447552069207504,
+    2221002654361034,
+    5127699386148536
+  )
+)
+
+# converting the first 10 characters
+ccards %>%
+  mutate(
+    creditcards_masked = map_chr(creditcards, ~ str_replace(.x, "^.{10}",
+      replacement = strrep("X", 10)
+    ))
+  )
+
+# converting the last 5 characters
+ccards %>%
+  mutate(
+    creditcars = map_chr(creditcards, ~ str_replace(.x, "\\d{5}$",
+      replacement = strrep("X", 5)
+    ))
+  )
+
+# dividing values into groups
+# get the data
+(age_starwars <- starwars %>%
+  mutate(age = as.integer(format(Sys.Date(), "%Y")) - birth_year) %>%
+  select(name, age) %>%
+  drop_na(age))
+
+# using cut_width()
+age_starwars %>%
+  mutate(
+    age_groups = cut_width(age, 10)
+  )
+
+# using cut_number()
+age_starwars %>%
+  mutate(
+    age_groups = cut_number(age, 10)
+  )
+
+# converting to millennia
+age_starwars %>%
+  mutate(
+    millenium = 1000 * (age %/% 1000)
+  )
+
+# converting to decades
+age_starwars %>%
+  mutate(
+    decade = 10 * (age %/% 10)
+  )
+
+# removing house numbers from street names
+street_names <- tibble(
+  street_name = c(
+    "Bromley Lanes 34",
+    "Woodsgate Avenue 12",
+    "Ardconnel Terrace 99",
+    "Gipsy Birches 45",
+    "Legate Close 8",
+    "Stevenson Oval 9",
+    "St Leonard's Boulevard 112",
+    "Copper Chare 435",
+    "Glastonbury Glebe 82",
+    "Southern Way 91"
+  )
+)
+
+street_names %>%
+  mutate(
+    street_names_no_number = str_remove_all(street_name, "\\d")
+  )
+
+# encrypting and decrypting columns
+users <- tibble(
+  name = c("Alexander", "Marie", "John"),
+  password = c(12345, "8$43_45*", "becker23#")
+)
+
+# genkeys() generates a public and private key pair
+# Passphrase: 456#7
+# genkeys()
+
+# encrypting a column
+# users_encrypted <- users %>%
+#   encrypt(password)
+
+# users_encrypted %>%
+#   glimpse()
+
+# decrypting the column
+# users_encrypted %>% decrypt(password)
 ```
 
 ## Packages
