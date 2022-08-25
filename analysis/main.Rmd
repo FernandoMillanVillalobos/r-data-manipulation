@@ -2356,7 +2356,19 @@ Arthritis$Improved <- ordered(Arthritis$Improved, levels = c("None", "Some", "Ma
 
 ## Tidyverse
 
-Factor variables are very useful but not very easy to manipulate. __forcats__ contains very useful functions that make working on factor variables painless. The four following functions, `fct_recode()`, `fct_relevel()`, `fct_reorder()` and `fct_relabel()`, are the ones you must know. `fct_reorder()` is especially useful for plotting. `fct_lump*()` functions make it possible to lump several levels of a factor into a new other level.
+A factor is a data structure in R that allows you to create a set of categories. We call these categories __levels__. It is well known in the psychological literature that we can only store a certain number of things in our working memory. Therefore, to help people make sense of categories, we shouldn’t show too many of them. This is where the strength of lumping factors shows. Lumping is nothing more than combining factor levels into a new and larger category. Factor variables are very useful but not very easy to manipulate. __forcats__ contains very useful functions that make working on factor variables painless. The four following functions, `fct_recode()`, `fct_relevel()`, `fct_reorder()` and `fct_relabel()`, are the ones you must know. `fct_reorder()` is especially useful for plotting. `fct_lump*()` functions make it possible to lump several levels of a factor into a new other level. The tidyverse team no longer recommends the use of this function. Instead, we can use the new functions created in 2020: 
+
+- `fct_lump_min`: lump levels that do not occur more than min times.
+- `fct_lump_n`: lumps n of the most or least frequently occurring levels.
+- `fct_lump_prop`: lumps of levels that occur at most n times * prop. 
+- `fct_lump_lowfreq`: lumps the least frequent levels.
+
+`fct_lump_min` summarizes all levels that do not appear more than min times. Compared to `fct_lump_min`, `fct_lump_n` is not about the number of levels. Instead, it simply
+keeps the most frequent levels or the least frequent levels. We have to decide what to do with the levels that occur the same number of times. If you don’t give the function any additional information, `fct_lump_n` will show you all the levels whose number falls below the last level, which is clearly one of the most frequent levels. You can change this behavior with the ties.method argument. The default argument is `min`. The other options are “average”, “first”, “last”, “random” and “max”.
+
+`fct_lump_prop` represents the percentage at which a particular level occurs within the total number of levels.
+
+Some of these four functions cause the `Other` level not to be the least common level. `fct_lump_lowfreq` simply ensures that so many levels are grouped together that the “Other” is still the least frequent level. It has no additional arguments except `other_level`, which is used to specify the name of the “other” level.
 
 ```{r}
 head(gss_cat)
@@ -2377,7 +2389,7 @@ gss_cat <- gss_cat %>%
 gss_cat %>%
   janitor::tabyl(marital)
 
-# lumping categories
+# lumping categories with the old not-recommend fct_lump() function
 gss_cat <- gss_cat %>%
   mutate(marital = fct_lump(marital, prop = 0.10, other_level = "other"))
 
@@ -2392,6 +2404,121 @@ gss_cat %>%
 
 gss_cat %>%
   tabyl(marital)
+
+# another example
+billboard %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+billboard %>%
+  mutate(artist = fct_lump(as_factor(artist), 10)) %>%
+  filter(artist != "Other") %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+# fct_lump() new functions
+# using fct_lump_min()
+billboard %>%
+  mutate(artist = fct_lump_min(as_factor(artist), 3)) %>%
+  filter(artist != "Other") %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+# another example
+table(gss_cat$rincome)
+
+gss_cat %>%
+  mutate(rincome = fct_lump_min(rincome, 600)) %>%
+  ggplot(aes(y = fct_infreq(rincome))) +
+  geom_bar()
+
+# using fct_lump_n()
+gss_cat %>%
+  mutate(rincome = fct_lump_n(rincome, n = 10)) %>% # lump all levels except the 10 most frequent
+  ggplot(aes(y = fct_infreq(rincome))) +
+  geom_bar()
+
+billboard %>%
+  mutate(artist = fct_lump_n(artist, n = -5)) %>% # lump all the levels that occur most often (exactly the opposite of what a positive number does)
+  filter(artist != "Other") %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+billboard %>%
+  mutate(artist = fct_lump_n(artist, 5, ties.method = "min")) %>%
+  filter(artist != "Other") %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+billboard %>%
+  mutate(artist = fct_lump_n(artist, 5, ties.method = "max")) %>%
+  filter(artist != "Other") %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+billboard %>%
+  mutate(artist = fct_lump_n(artist, 5, ties.method = "random")) %>%
+  filter(artist != "Other") %>%
+  ggplot(aes(y = artist)) +
+  geom_bar()
+
+# fct_lump_prop()
+# step by step explanation
+# 1. how many times all levels occur in total
+(total_count_income <- gss_cat %>% count(rincome) %>%
+  {
+    sum(.$n)
+  }) 
+
+# 2. choose a specific income range and how often occurs 
+(count_one_range <- gss_cat$rincome[gss_cat$rincome == "$20000 - 24999"] %>%
+  length())
+
+# 3. calculating the proportion
+count_one_range / total_count_income
+
+# the same but with fct_lump_prop()
+gss_cat %>%
+  mutate(rincome = fct_lump_prop(rincome, .05)) %>% # levels that occur in less than 5% of all counts
+  ggplot(aes(y = fct_infreq(rincome))) +
+  geom_bar()
+
+# checking with tidyverse
+gss_cat %>%
+  count(rincome, name = "count_per_income_range") %>%
+  select(rincome, count_per_income_range) %>%
+  mutate(
+    total_count_income = sum(count_per_income_range),
+    percentage = count_per_income_range / total_count_income
+  ) %>%
+  filter(percentage >= .05)
+
+# using fct_lump_lowfreq)
+# without fct_lump_lowfreq()
+gss_cat %>%
+  mutate(
+    rincome = fct_lump_n(rincome, n = 10),
+    color_coding_rincome = ifelse(rincome == "Other", "a", "b")
+  ) %>%
+  ggplot(aes(
+    y = fct_infreq(rincome),
+    fill = color_coding_rincome
+  )) +
+  scale_fill_manual(values = c("grey20", "grey80")) +
+  geom_bar(show.legend = FALSE)
+
+# with fct_lump_lowfreq()
+gss_cat %>%
+  mutate(
+    rincome = fct_lump_lowfreq(rincome),
+    color_coding_rincome = ifelse(rincome == "Other", "a", "b")
+  ) %>%
+  ggplot(aes(
+    y = fct_infreq(rincome),
+    fill = color_coding_rincome
+  )) +
+  scale_fill_manual(values = c("grey20", "grey80")) +
+  geom_bar(show.legend = FALSE)
 
 # using fct_reorder()
 gss_cat %>%
