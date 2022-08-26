@@ -167,6 +167,7 @@ library(chron)
 library(plm)
 library(randomNames)
 library(encryptr)
+library(robotstxt)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -2363,8 +2364,7 @@ A factor is a data structure in R that allows you to create a set of categories.
 - `fct_lump_prop`: lumps of levels that occur at most n times * prop. 
 - `fct_lump_lowfreq`: lumps the least frequent levels.
 
-`fct_lump_min` summarizes all levels that do not appear more than min times. Compared to `fct_lump_min`, `fct_lump_n` is not about the number of levels. Instead, it simply
-keeps the most frequent levels or the least frequent levels. We have to decide what to do with the levels that occur the same number of times. If you don’t give the function any additional information, `fct_lump_n` will show you all the levels whose number falls below the last level, which is clearly one of the most frequent levels. You can change this behavior with the ties.method argument. The default argument is `min`. The other options are “average”, “first”, “last”, “random” and “max”.
+`fct_lump_min` summarizes all levels that do not appear more than min times. Compared to `fct_lump_min`, `fct_lump_n` is not about the number of levels. Instead, it simply keeps the most frequent levels or the least frequent levels. We have to decide what to do with the levels that occur the same number of times. If you don’t give the function any additional information, `fct_lump_n` will show you all the levels whose number falls below the last level, which is clearly one of the most frequent levels. You can change this behavior with the ties.method argument. The default argument is `min`. The other options are “average”, “first”, “last”, “random” and “max”.
 
 `fct_lump_prop` represents the percentage at which a particular level occurs within the total number of levels.
 
@@ -3120,6 +3120,83 @@ mpg %>%
   add_tally(wt = displ, name = "sum_display_per_model") %>%
   select(manufacturer, model, sum_display_per_model) %>%
   glimpse()
+```
+
+# Web scraping
+
+## Packages
+
+Web scraping process:
+
+1. Check to make sure the site hasn’t blocked automated retrieval.
+2. Get a list of all the links we want, with the help of a Chrome extension called __SelectorGadget__ and the __rvest__ R package.
+3. Download the files.
+
+### Step 1: Follow the rules with robotstxt
+
+It’s a World Wide Web convention that if a site wants to restrict automated bots from “crawling” its pages – either all pages or just some – it posts those details in a robots.txt file in its root directory. So, for a site at www.thesiteurl.com, robots.txt can be found at http://thesiteurl.com/robots.txt (or, in many cases, http://www.thesiteurl.com/robots.txt or https://www.thesiteurl.com/robots.txt).
+
+To be a responsible and considerate Internet citizen, you should make sure a site hasn’t refused bots and scripts from accessing its pages before starting to scrape.
+You can look at these files manually – for example, checking RStudio’s robots.txt file by going to https://wwwrstudio.com/robots.txt in a browser. But it’s more elegant – and automated – to use the robotstxt package to check for you. Plus, each time you run a scraper (if it’s one you want to use more than once), you’ll be sure the site’s robots.txt hasn’t changed to exclude you. An easy way to do this is using the package `robotstxt` and the `paths_allowed()` function.
+
+### Step 2: Get a list of links
+
+__SelectorGadget__ is a point-and-click tool that lets you easily figure out what CSS selectors to use in order to extract a portion of a Web page. CSS makes those more useful by categorizing those broad HTML elements into subsets, using identifiers hopefully added by the creator of an HTML page, such as class and id. When you’ve got exactly the selection you want, look at the text at the bottom right of the page: That’s your CSS selector. Copy it and paste it into an R variable. Once you know where your data is, there are several steps to parsing an HTML page with __rvest__ and extracting data. rvest’s `read_html()` function will return a list with special R object classes of “xml_document” and “xml_node”. To extract the portion of the page we want, we use CSS selectors and rvest’s `html_nodes()` function. The page we read in is the first argument to `html_nodes()`; the CSS selector is second. There’s another __rvest__ function that can extract a specific attribute: the `html_attr()` function. For example, for the ‘href’ attribute, html_attr('href') would work. If instead of the link attribute, you wanted the text for that link, you would use the `html_text()` function.
+
+### Step 3: Download files
+
+Finally, we’d like to download the files at each of those links. We can do that by applying base R’s `download.file()` function. However, `download.file()` requires both a url (which we have) and a file name (which we don’t have yet), using the syntax `download.file(myurl, myfilename)`. __purrr__ can help. It would be easiest, but pretty clunky, to use the URL as the file name. We’ll be happier later if we extract a file name from the URL and use that for the name. Fortunately, base R has a function to do just that: `basename()`. We want to apply the `basename()` function to all the URLs in my_urls and save the results into an R vector of character strings. purrr’s `map_chr()` will do just that.
+
+Ideally, I’d like to use the vector of URLs and the vector of file names when downloading files, so each URL is downloaded to a file with the appropriate file name. In other words: `download.file(my_urls[1], my_filenames[1])`, `download.file(my_urls[2], my_filenames[2])`, and so on. Both `walk()` and the `map()` family have sister functions designed to do just that: apply a function to two data sets at a time, one by one. For walk, it’s `walk2()`. For map, it’s `map2()`, `map2_df()`,` map2_chr()`, and so on.
+
+In this case, we want to download the files, but the `download.file()` function itself saves the file – there’s no additional value we want to store. So, a `walk()` option is the better choice. `walk2()` uses the syntax `walk2(myfirstvector, mysecondvector, myfunction)` to apply myfunction like `myfunction(myfirstvector[1], mysecondvector[1]), myfunction(myfirstvector[2], mysecondvector[2]), myfunction(myfirstvector[3], mysecondvector[3])`, and so on. This code applies `download.file()` to the URLs and file names one by one in tandem, with the URLs as first argument and file names as the second argument.
+
+```{r}
+# 1. Checking
+# checking robotstxt
+paths_allowed("https://www.rstudio.com/resources/cheatsheets/")
+
+# 2. Getting a list of all links we want
+# selecting CSS (using previosly SelectorGadget!)
+my_css <- "p .btn-primary"
+# reading HTML page
+my_html <- rvest::read_html("https://www.rstudio.com/resources/cheatsheets/")
+# extracting the portion of the we want using CSS selectors
+my_nodes <- rvest::html_nodes(my_html, my_css)
+# all the items saved
+head(my_nodes)
+# looking the items in the list
+my_nodes[[2]]
+# extracting the href attribute
+my_urls <- rvest::html_nodes(my_html, my_css) %>%
+rvest::html_attr('href')
+head(my_urls)
+# looking at the first item on the list
+my_urls[2]
+# extracting the htext attribute
+my_nodes_text <- rvest::html_nodes(my_html, my_css) %>%
+  rvest::html_text()
+# looking at the first text
+my_nodes_text[2]
+
+# 3. Downloading files
+# getting the file names
+my_filenames <- map_chr(my_urls, basename)
+# applying a function to two vectors at a time
+# walk2(my_urls, my_filenames, download.file)
+
+# for loop option
+# for (i in seq_along(1:length(my_urls)) {
+#   download.file(my_urls[i], my_filenames[i])
+# }
+
+# another example
+url <- "https://en.wikipedia.org/wiki/List_of_Nobel_laureates"
+wiki <- rvest::read_html(url)
+tables <- rvest::html_nodes(wiki, "table")
+tables
+laureates <- rvest::html_table(tables[[1]], fill = TRUE)
+head(laureates)
 ```
 # Linting
 
