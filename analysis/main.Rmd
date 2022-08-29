@@ -521,6 +521,44 @@ head(data_df)
 contributions <- map_df(list.files("input/mayor_finance_reports", full.names = TRUE), rio::import)
 head(contributions)
 
+# using janitor::tabyl() function to count number of rows within a group
+contributions <- map_df(list.files("input/mayor_finance_reports", full.names = TRUE), rio::import) %>%
+  filter(City == "Framingham", !str_detect(tolower(Address), "box")) %>%
+  distinct(Contributor, Address, .keep_all = TRUE) %>%
+  tabyl(Recipient, sort = TRUE) %>%
+  # mutate(percent = round(percent * 100, 1)) %>% 
+  select(Candidate = Recipient, Pct_Local_Contributors = percent)
+contributions
+
+# using adorn_percentages()
+results <- readr::read_csv("input/election_framingham_mayor_2017_09.csv", col_names = TRUE) %>% 
+  dplyr::select(Candidate, Totals)
+results
+
+results <- results %>%
+  filter(!(Candidate %in% c("Blanks", "Write-Ins"))) %>%
+  adorn_percentages(denominator = "col") %>% 
+   rename(Pct_Vote = Totals)
+results
+
+contributions_split <- tidyr::separate(
+  contributions, Candidate,
+  c("LastName", "FirstName"), ", ", 2
+) %>%
+  select(-FirstName)
+head(contributions_split)
+
+results_split <- tidyr::separate(results, Candidate, c("FirstName", "MiddleName", "LastName"), " ")
+tail(results_split)
+
+results_split %<>%
+  mutate(
+    LastName = ifelse(is.na(LastName), MiddleName, LastName),
+    LastName = str_replace(LastName, ",", "")
+  ) %>%
+  select(-FirstName, -MiddleName)
+tail(results_split)
+
 # reading the files from a character vector of paths
 data_frames <- map_dfr(csv_files_dir_ls, ~ read_csv(.x, show_col_types = FALSE))
 glimpse(data_frames)
