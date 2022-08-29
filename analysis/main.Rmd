@@ -517,6 +517,10 @@ head(data_df)
 # with dir_ls from fs package
 (csv_files_dir_ls <- dir_ls(path = "input/many_files/", glob = "*.csv", type = "file"))
 
+# another example using map.df(), list.files() and rio::import()
+contributions <- map_df(list.files("input/mayor_finance_reports", full.names = TRUE), rio::import)
+head(contributions)
+
 # reading the files from a character vector of paths
 data_frames <- map_dfr(csv_files_dir_ls, ~ read_csv(.x, show_col_types = FALSE))
 glimpse(data_frames)
@@ -578,7 +582,6 @@ csv_files_nested[str_detect(csv_files_nested, pattern = "[2-4]_first|second\\.cs
             mutate(filename = .x)) %>% 
   glimpse()
 ```
-
 ### Writing data
 
 The `write_csv` function writes tabular data to an ASCII file in CSV format. Each row of data creates one line in the file, with data items separated by commas (,).
@@ -795,6 +798,9 @@ cities <- data.frame(city = c("New York", "Boston", "Juneau", "Anchorage", "San 
 states <- data.frame(state.abb = c("NY", "MA", "AK", "CA", "PA", "MI", "WA"), state = c("New York", "Massachusetts", "Alaska", "California", "Pennsylvania", "Michigan", "Washington"))
 
 merge(cities, states)
+
+# another example
+# mayordata <- merge(contributions_split, results_split, all.x = TRUE, all.y = TRUE, by.x = "LastName", by.y = "LastName")
 ```
 
 ## Tidyverse
@@ -902,6 +908,8 @@ The `extract` function is basically the separate function with super powers and 
 
 To extract columns that are more complicated and confusing, we need to learn the concept of __non-grouping parentheses__. Non-grouping parentheses define groups that are not captured. In other words, these groups are not converted into a new column. A non-grouping parenthesis is defined by a group that starts with a question mark and a colon: (`?:`). The advantage of this method is that we can solve column separation problems caused by messy or inconsistent variables.
 
+tidyr’s `separate()` function will split a data frame column into multiple columns based on a delimiter of your choice. The syntax is `separate(my_df, my_col_name, my_new_col_names, my_delimiter, my_number_of_new_columns)`.
+
 ![Regular Expressions](input/img/regular-expressions-cheat-sheet-v2.pdf) 
 
 ```{r}
@@ -928,6 +936,25 @@ time_df <- select(data_vigo, date) %>%
   separate(date, c("yr", "mo", "dy"), sep = "-") %>%
   mutate_all(as.numeric)
 head(time_df)
+
+# another example
+contributions_split <- tidyr::separate(
+  contributions, Candidate,
+  c("LastName", "FirstName"), ", ", 2
+) %>%
+  select(-FirstName)
+head(contributions_split)
+
+results_split <- tidyr::separate(results, Candidate, c("FirstName", "MiddleName", "LastName"), " ")
+tail(results_split)
+
+results_split %<>%
+  mutate(
+    LastName = ifelse(is.na(LastName), MiddleName, LastName),
+    LastName = str_replace(LastName, ",", "")
+  ) %>%
+  select(-FirstName, -MiddleName)
+tail(results_split)
 
 # using case_when()
 time_df <- mutate(time_df, season = case_when(
@@ -1061,6 +1088,13 @@ tibble(
     regex = "(\\d)?\\.(\\d+) ?= ?(?:(\\w+)?:?)?(?:[?_$]*)(\\d+)?",
     remove = FALSE
   )
+
+# another example
+results_regexp <- results %>%
+  mutate(
+    LastName = str_replace_all(Candidate, ".*\\s(.*?)\\,?$", "\\1")
+  )
+tail(results_regexp)
 ```
 Techniques for __anonymizing__ and __pseudoanonymizing__ columns avoid data breaches that they are potentially dangerous for those affected. For that We will find out how to use the function `fct_anon`, how to replace names with random names, how to mask values, how to group numeric variables, how to remove house numbers from street names, and how to encode and decode values.The difference between pseudonymization and anonymization is that pseudonymization is reversible, while anonymization is not.
 
@@ -1344,6 +1378,11 @@ merge(rev_data, weather_data, all = TRUE, by = "DATE")
 # dplyr
 # rev_data %>% 
 #   full_join( weather_data, by = "DATE")
+
+# another example
+mayordata <- full_join(contributions_split, results_split, by = "LastName")
+str(mayordata)
+head(mayordata)
 
 # preparing the data
 filter_data <- weather_data[TEMPERATURE < 0 & DATE %between% c("2020-02-01", "2020-02-29"), ]
@@ -1816,6 +1855,8 @@ Sometimes you don"t want to filter rows, but rearrange their order according to 
 
 In some cases, you may want to fill missing values of a variable with the previous non-missing entry. To fill the missing values with the last non-missing entry, we can now use `nafill` or `fill`.
 
+dplyr’s `distinct()` function will remove data frame rows based on duplication in certain columns. If you want to keep all the other variables in a data frame and not just the non-repetitive ones, `distinct()` needs the additional `.keep_all = TRUE` argument. Otherwise, it will return a data frame with only the columns you want to ensure haven’t been duplicated.
+
 ```{r}
 aq <- as.data.table(airquality)
 
@@ -1890,7 +1931,15 @@ aq %>% filter(
 )
 aq %>% filter(dplyr::between(Temp, 70, 90))
 aq %>% top_n(5, Temp)
-aq %>% distinct # removing duplicate rows
+aq %>% distinct # removing duplicate rows based on duplication on certain columns
+
+# another example of distinct()
+# contributions <- map_df(list.files("mayor_finance_reports",
+#   full.names = TRUE
+# ), rio::import) %>%
+#   filter(City == "Framingham", !str_detect(tolower(Address), "box")) %>%
+#   distinct(Contributor, Address, .keep_all = TRUE)
+
 aq %>% drop_na # removing rows with missing data
 aq %>% drop_na("Ozone") # removing rows with missing Ozone values
 
@@ -3120,6 +3169,32 @@ mpg %>%
   add_tally(wt = displ, name = "sum_display_per_model") %>%
   select(manufacturer, model, sum_display_per_model) %>%
   glimpse()
+```
+
+## Packages
+
+To count the number of rows within a group the janitor’s `tabyl()` function makes it really easy. While `tabyl()` counted rows by group, janitor’s `adorn_percentages()` function will calculate percentages in a data frame, allowing you to choose whether the denominator for dividing each item should be a sum by row or col. If you’d like the results to look like conventional percents – multiplied by a hundred and rounded with the percent sign included – add the `adorn_pct_formatting()` function. However, this will turn the percents into character strings because of the percent sign, which R doesn’t recognize as part of a number. So only use that formatting if you don’t need the data as numbers in your data frame. The syntax for calculating percents that are non-rounded fractions: `adorn_percentages(mydf, denominator = "col")` for calculating by column. `adorn_percentages(mydf)` defaults by row.
+
+```{r}
+# using janitor::tabyl() function to count number of rows within a group
+contributions <- map_df(list.files("input/mayor_finance_reports", full.names = TRUE), rio::import) %>%
+  filter(City == "Framingham", !str_detect(tolower(Address), "box")) %>%
+  distinct(Contributor, Address, .keep_all = TRUE) %>%
+  tabyl(Recipient, sort = TRUE) %>%
+  # mutate(percent = round(percent * 100, 1)) %>% 
+  select(Candidate = Recipient, Pct_Local_Contributors = percent)
+contributions
+
+# using adorn_percentages()
+results <- readr::read_csv("input/election_framingham_mayor_2017_09.csv", col_names = TRUE) %>% 
+  dplyr::select(Candidate, Totals)
+results
+
+results <- results %>%
+  filter(!(Candidate %in% c("Blanks", "Write-Ins"))) %>%
+  adorn_percentages(denominator = "col") %>% 
+   rename(Pct_Vote = Totals)
+results
 ```
 
 # Web scraping
