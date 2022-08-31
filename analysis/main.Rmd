@@ -2457,6 +2457,12 @@ A factor is a data structure in R that allows you to create a set of categories.
 
 Some of these four functions cause the `Other` level not to be the least common level. `fct_lump_lowfreq` simply ensures that so many levels are grouped together that the “Other” is still the least frequent level. It has no additional arguments except `other_level`, which is used to specify the name of the “other” level.
 
+A factor is an ordered data structure in R. What is ordered in a factor are its levels. Usually, you need to know the order of levels when you try to visualize factor columns. Let’s say you want to order the bars in your bar chart. Or you want to order the facets in your chart. Or you want to order the lines in your line chart. We can change the order of the factor levels manually by using the function `fct_relevel`. The first argument is the factor column. Then you list the levels you want to place first. You could also do this with a vector. By default factor levels are ordered by alphabetical order. We can place factor levels wherever we like with the `after` argument. Your levels will be placed at the __nth + 1__ position of this number.
+
+With the function `fct_infreq` we can change the order according to how frequent each level occurs. If you want to reverse the order of the levels, you can use the `fct_rev` function.
+
+The function `fct_reorder` allows to order the levels based on another continuous variable. We can reverse the order in two ways. First, by setting the `.desc` argument to `TRUE` or with the function `fct_rev`. The `.fun` argument is set to the function __median__ and it is useful when you have many values for each factor level. This is always the case when you create a __boxplot__ or a __violin diagram__. The function `fct_reorder2` finds the largest values of one variable at the largest value of another variable. We can reverse the order by setting the `.fun` argument to `first2`.
+
 ```{r}
 head(gss_cat)
 str(gss_cat$marital)
@@ -2620,6 +2626,214 @@ gss_cat %>%
   ggplot() +
   geom_col(aes(y = n, x = marital)) +
   coord_flip()
+
+# order factor levels manually
+# getting the data
+msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+
+# using fct_relevel()
+msleep %>%
+  dplyr::filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  mutate(
+    name = fct_relevel(name, c("Cow", "Dog"))
+  ) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+
+msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  mutate(
+    name = fct_relevel(name, "Cow", after = 3)
+  ) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+
+# how to order the levels based on how frequently each level occurs
+# getting the data
+mpg %>%
+  ggplot(aes(x = manufacturer)) +
+  geom_bar() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+
+# using fct_infreq()
+mpg %>%
+  mutate(manufacturer = fct_infreq(manufacturer)) %>%
+  ggplot(aes(x = manufacturer)) +
+  geom_bar() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+
+# in reverse order
+mpg %>%
+  mutate(manufacturer = fct_infreq(manufacturer) %>% fct_rev()) %>%
+  ggplot(aes(x = manufacturer)) +
+  geom_bar() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+
+# how to order the levels based on the values of a numeric variable
+# getting the data
+(sleep_data <- msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  select(name, sleep_total))
+
+msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+
+# using fct_reorder()
+sleep_data %>%
+  mutate(
+    name = as.factor(name) %>% fct_reorder(sleep_total)
+  ) %>%
+  pull(name)
+
+msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  mutate(
+    name = as.factor(name) %>% fct_reorder(sleep_total)
+  ) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+
+# reversing the order
+msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  mutate(
+    name = as.factor(name) %>%
+      fct_reorder(sleep_total, .desc = TRUE)
+  ) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+# or
+msleep %>%
+  filter(name %in% c("Cow", "Dog", "Tiger", "Chimpanzee")) %>%
+  mutate(
+    name = as.factor(name) %>%
+      fct_reorder(sleep_total) %>%
+      fct_rev()
+  ) %>%
+  ggplot(aes(x = name, y = sleep_total)) +
+  geom_col()
+
+# using the argument .fun = into de fct_reorder()
+mpg %>%
+  ggplot(aes(x = displ, y = manufacturer)) +
+  geom_boxplot()
+
+# by default .fun is set to median
+mpg %>%
+  mutate(
+    manufacturer = fct_reorder(as.factor(manufacturer), displ)
+  ) %>%
+  ggplot(aes(x = displ, y = manufacturer)) +
+  geom_boxplot()
+
+mpg %>%
+  mutate(
+    manufacturer = fct_reorder(
+      as.factor(manufacturer),
+      displ
+    )
+  ) %>%
+  ggplot(aes(x = displ, y = manufacturer)) +
+  geom_boxplot() +
+  stat_summary(geom = "point", fun = "median", color = "blue") +
+  stat_summary(geom = "line", fun = "median", color = "blue", group = 1)
+
+# setting .fun to max
+mpg %>%
+  mutate(
+    manufacturer = fct_reorder(as.factor(manufacturer),
+      displ,
+      .fun = max
+    )
+  ) %>%
+  ggplot(aes(x = displ, y = manufacturer)) +
+  geom_boxplot() +
+  stat_summary(geom = "point", fun = "max", color = "blue") +
+  stat_summary(geom = "line", fun = "max", color = "blue", group = 1)
+
+# setting .fun to min
+mpg %>%
+  mutate(
+    manufacturer = fct_reorder(as.factor(manufacturer),
+      displ,
+      .fun = min
+    )
+  ) %>%
+  ggplot(aes(x = displ, y = manufacturer)) +
+  geom_boxplot() +
+  stat_summary(geom = "point", fun = "min", color = "blue") +
+  stat_summary(geom = "line", fun = "min", color = "blue", group = 1)
+
+# setting the .fun to the range between the maximum and the minimum values
+mpg %>%
+  mutate(
+    manufacturer = fct_reorder(as.factor(manufacturer),
+      displ,
+      .fun = function(x) max(x) - min(x)
+    )
+  ) %>%
+  ggplot(aes(x = displ, y = manufacturer)) +
+  geom_boxplot()
+
+# with facets
+population %>%
+  filter(country %in% c(
+    "Afghanistan", "Germany", "Brazil",
+    "Canada"
+  )) %>%
+  mutate(country = fct_reorder(country,
+    population,
+    .fun = function(x) min(x) - max(x)
+  )) %>%
+  ggplot(aes(x = year, y = population)) +
+  geom_line() +
+  facet_wrap(vars(country))
+
+# how to order levels based on the values of two numeric variables
+# getting the data
+marital_status_per_age <- gss_cat %>%
+  count(age, marital) %>%
+  group_by(age) %>%
+  mutate(
+    prop = n / sum(n)
+  ) %>%
+  ungroup()
+
+marital_status_per_age %>%
+  ggplot(aes(x = age, y = prop, color = marital)) +
+  stat_summary(geom = "line", fun = mean)
+
+# using fct_reorder2()
+marital_status_per_age %>%
+  group_by(marital) %>%
+  slice_max(age) %>%
+  ungroup() %>%
+  arrange(desc(prop))
+
+marital_status_per_age %>%
+  mutate(
+    marital = as.factor(marital) %>%
+      fct_reorder2(age, prop)
+  ) %>%
+  ggplot(aes(x = age, y = prop, color = marital)) +
+  stat_summary(geom = "line", fun = mean)
+
+# reversing the order
+marital_status_per_age %>%
+  mutate(
+    marital = as.factor(marital) %>%
+      fct_reorder2(age, prop, .fun = first2)
+  ) %>%
+  ggplot(aes(x = age, y = prop, color = marital)) +
+  stat_summary(geom = "line", fun = mean) +
+  theme(
+    legend.position = "left"
+  )
 ```
 
 # Dates and Times
