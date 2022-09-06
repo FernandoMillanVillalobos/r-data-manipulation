@@ -1743,6 +1743,10 @@ Finally, there is the `where` function. `where` is used when you want to select 
 
 You can combine the different selection functions with the `&` and `|` operators.
 
+With `mutate` you normally specify the new column to be created or overwritten. With `across` you don’t have to do that. Without specifying the `.names` argument, the names of your columns remain the same, you just apply the function(s) to those columns.
+
+When we impute missing values, we replace them with substituted values.
+
 ```{r}
 snowdata <- rio::import("input/BostonChicagoNYCSnowfalls.csv")
 # knowing how may rows
@@ -1865,6 +1869,107 @@ mpg %>%
 mpg %>%
   select(where(is.character) | contains("l")) %>%
   glimpse()
+
+# how to change the variable type across many columns
+mpg %>%
+  mutate(
+    across(
+      .cols = where(is.character),
+      .fns = as_factor,
+      .names = "{.col}_as_factor"
+    )
+  ) %>%
+  dplyr::select(where(is.factor) | where(is.character)) %>%
+  glimpse()
+
+# how to normalize many columns (mean of 0 and a standard deviation of 1)
+scaled_columns <- mpg %>%
+  transmute(
+    across(
+      .cols = where(is.numeric),
+      .fns = ~ scale(.)[,1],
+    )
+  )
+
+scaled_columns %>%
+  glimpse()
+
+# checking the results
+scaled_columns %>%
+  dplyr::summarise(
+    across(
+      .cols = everything(),
+      .fns = list(mean = mean, sd = sd)
+    )
+  ) %>%
+  glimpse()
+
+# how to impute values across many columns
+# getting the data
+(dframe <- tibble(
+  group = c("a", "a", "a", "b", "b", "b"),
+  x = c(3, 5, 4, NA, 4, 8),
+  y = c(2, NA, 3, 1, 9, 7)
+))
+
+# replace each missing value with the mean value of the respective column
+dframe %>%
+  mutate(
+    across(
+      .cols = c(x, y), # or everything()
+      .fns = ~ ifelse(test = is.na(.),
+        yes = mean(., na.rm = TRUE),
+        no = .
+      )
+    )
+  )
+# or
+dframe %>%
+  mutate(
+    across(
+      .cols = c(x, y), # or everything()
+      .fns = ~ case_when(
+        is.na(.) ~ mean(., na.rm = TRUE),
+        TRUE ~ .
+      )
+    )
+  )
+
+# you can also impute the values within groups
+dframe %>%
+  group_by(group) %>%
+  mutate(
+    across(
+      .cols = c(x, y), # or everything()
+      .fns = ~ case_when(
+        is.na(.) ~ mean(., na.rm = TRUE),
+        TRUE ~ .
+      )
+    )
+  ) %>%
+  ungroup()
+
+# how to replace characters across many columns
+# getting the data
+typo_dframe <- tribble(
+  ~pre_test, ~post_test,
+  "goud", "good",
+  "medium", "good",
+  "metium", "metium",
+  "bad", "goud"
+)
+
+(typo_corrected <- typo_dframe %>%
+  mutate(
+    across(
+      .cols = everything(),
+      .fns = ~ case_when(
+        str_detect(., "goud") ~ str_replace(., "goud", "good"),
+        str_detect(., "metium") ~ str_replace(., "metium", "medium"),
+        TRUE ~ .
+      )
+    )
+  ))
 ```
 
 ## Packages
@@ -3298,7 +3403,26 @@ Counting is one of the most common tasks you do when working with data. Counting
 
 The argument `wt` stands for weighted counts. While count calculates the frequency of values within a group without specifying the `wt` argument (`n = n()`), __`wt` calculates the sum of a continuous variable for certain groups (`n = sum(<VARIABLE>)`)__. This technique has its advantages and disadvantages. On the positive side, we only need three lines of code instead of six. On the downside, the code is less explicit, and without knowing the inner workings of count, it’s hard to tell that the function is calculating sums.
 
-`add_tally()` does something similar than `add_count()`. The only difference is that `add_tally` calculates the sum of a given variable instead of a count. `add_tally` has no argument for grouping the data. You must accomplish this with `group_by`. 
+`add_tally()` does something similar than `add_count()`. The only difference is that `add_tally` calculates the sum of a given variable instead of a count. `add_tally` has no argument for grouping the data. You must accomplish this with `group_by`.
+
+One of the credos of programming is “Don’t repeat yourself”. The tidyverse team has developed a set of functions that make it easier not to repeat ourselves: the `across` function that follows this general structure:
+
+<DFRAME> %>%
+  <DPLYR VERB>(
+    across(
+    .cols = <SELECTION OF COLUMNS>,
+    .fns = <FUNCTION TO BE APPLIED TO EACH COLUMN>,
+    .names = <NAME OF THE GENERATED COLUMNS>
+    )
+)
+
+A couple of things are important here:
+
+- The function across only works __inside dplyr verbs__ (e.g. mutate).
+- The function has three important arguments: `.cols` stands for the column to apply a function to. You can use the tidyselect functions here; `.fns` stands for the function(s) that will be applied to these columns; `.names` is used whenever you want to change the names of the selected columns.
+- The `.fns` argument takes three different values: (1) A simple function (e.g. `mean`). (2) A purrr-style lambda function (e.g. `~ mean(.x, na.rm = TRUE)`). You use these lamba functions if you need to change the arguments of a function. (3) A list of functions (e.g. `list(mean = mean, sd = sd)`). The list can also be combined with lambda functions (e.g. `list(mean = mean(.x, na.rm = TRUE), sd = sd(.x, na.rm = TRUE))`).
+
+You can be quite creative with `across` and `summmarise`, because you can calculate any summary statistic for many columns. The mean, standard deviation or median are just obvious examples. Making the problem smaller and easier to digest, you might simply ask yourself, “What summary statistics can I compute from a vector?”
 
 ```{r}
 # loading the data
@@ -3361,6 +3485,52 @@ gasoline %>%
 gasoline %>%
   group_by(across(seq(1:2))) %>%
   dplyr::summarise(mean(lincomep))
+
+# another across() example
+mpg %>%
+  group_by(manufacturer) %>%
+  dplyr::summarise(
+    across(
+      .cols = c("displ", "cty"),
+      .fns = ~ mean(.x, na.rm = TRUE),
+      .names = "mean_{.col}"
+    )
+  )
+
+# same example as before with changed col names and a func list()
+mpg %>%
+  group_by(manufacturer) %>%
+  dplyr::summarise(
+    across(
+      .cols = c("displ", "cty"),
+      .fns = list(mean = mean, sd = sd),
+      .names = "{.fn}_{.col}"
+    )
+  )
+
+# another example with 3 funcs
+mpg %>%
+  group_by(manufacturer) %>%
+  dplyr::summarise(
+    across(
+      .cols = where(is.numeric),
+      .fns = list(
+        mean = mean, sd = sd,
+        median = median
+      ),
+      .names = "{.fn}_{.col}"
+    )
+  ) %>%
+  glimpse()
+
+# how to calculate the number of distinct values across many columns
+mpg %>%
+  dplyr::summarise(
+    across(
+      .cols = everything(),
+      .fns = n_distinct
+    )
+  )
 
 # how to count with continuous variables
 starwars %>%
