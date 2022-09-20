@@ -147,6 +147,7 @@ library(lintr)
 library(rmarkdown)
 library(rio)
 library(cowplot)
+library(patchwork)
 library(extrafont)
 library(ggrepel)
 library(pacman)
@@ -167,6 +168,7 @@ library(plm)
 library(randomNames)
 library(encryptr)
 library(robotstxt)
+library(tidymodels)
 library(janitor)",
 file = "manifest.R")
 ```
@@ -1740,13 +1742,17 @@ Both functions were introduced in __dplyr__ in February 2021. One reason for the
 
 Another very useful use case is filtering rows based on missing values across multiple columns. Besides that, we can combine `case_when` with `if_any` / `if_all` to create a new column based on multiple column-spanning conditions. This works because the left side of the two-sided `case_when` formulas expects a logical value (<LOGICAL VALUE> == <RIGHT HAND SIDE>).
 
+Both slicing and filtering allow you to remove or keep rows in a data frame. Essentially, you can use both to achieve the same result, but their approaches differ. While `filter` works with conditions (e.g. `displ > 17`), `slice` works with indices. `slice` keeps all rows for which you specify positive indices. Note that in R indexing starts with 1 and not with 0 as in most other programming languages. You can also provide a vector of indices instead of the comma-separated indices in the `slice` function. To remove specific rows, we can use negative indices. A common use case within the `slice` family is to slice rows that have the highest or lowest value within a column. Finding these rows with `filter` would be tedious. A much easier way to achieve the same result is to use `slice_max()`. For the first argument `order_by` you specify the column for which the highest values should be taken. With `n` you specify how many of the rows with the highest values you want to keep. If you are more interested in the percentage of rows with the highest value, you can use the argument `prop`. Similarly, you can keep the rows with the lowest values in a given column with `slice_min()`. The `slice` functions become especially powerful when combined with `group_by`. The trick is that any function called after `group_by` is only applied to the subgroups. Another useful function is `slice_sample`. It randomly selects rows from your data frame. You define how many should be selected. `slice_sample` by default samples without replacement. Once we have selected a row, we cannot select it again. Consequently, there will be no duplicate rows in our data frame. However, if we set the `replace` argument to `TRUE`, we will perform sampling with replacement. We can find the duplicate rows with the function `get_dupes` from the __janitor__ package.
+
+This functionality allows us to create bootstraps from our data frame. Bootstrapping is a technique where a set of samples of the same size are drawn from a single original sample.For example, if you have a vector `c(1, 4, 5, 6)`, you can create the following bootstraps from this vector: `c(1, 4, 4, 6)`, `c(1, 1, 1, 1)` or `c(5, 5, 1, 6)`. Some values appear more than once because bootstrapping allows each value to be pulled multiple times from the original data set. Once you have your bootstraps, you can calculate metrics from them. For example, the mean value of each bootstrap. The underlying logic of this technique is that since the sample itself is from a population, the bootstraps act as proxies for other samples from that population. We can create many bootstrap from our sample. frames. Once we have the bootstraps, we can calculate any metric from them. Usually one calculates confidence intervals, standard deviations, but also measures of center like the mean from the bootstraps.
+
 Use `arrange(dataframe, colname)` to sort in ascending order and `arrange(dataframe, desc(colname))` to sort in descending order. To sort by a second column in case there are ties in the first column, the syntax is `arrange(dataframe, col1, col2)`.
 
 You can select by specific column name, no quotes or `c()` needed: `select(snowdata, Winter, Boston)`. Select a contiguous group of columns, such as starting with Boston and ending with New York City, with the syntax `select(snowdata, Boston:NYC)`. You can select based on column names containing certain characters; for example, if you had a data frame with column names in the format city_state such as Boston_MA, Chicago_IL, NYC_NY, Fargo_ND and Syracuse_NY, you could select all the New York State entries using `select(dataframe, contains("_NY"))` or `select(dataframe, ends_with("_NY")`. You can delete columns by putting a minus sign before your selection, such as `select(snowdata, -(Boston:Chicago))` or `select(dataframe, -contains("_NY"))`. `select_if()` lets you use `is. functions` such as `is.numeric()` or `is.character()` to choose columns by data type.
 
 The __tidyselect__ functions give you many options to select columns in R. The first function is `everything`. As the name suggests, it lets you select all columns of a data frame. Then we have `last_col`. With this function you can select the last column in a data frame. We have the two functions `starts_with` and `ends_with`. You use these functions when you want to select columns that start or end with exactly a certain string. `starts_with` and `ends_with` works with any character, but also with a vector of characters.
 
-Next we have the `contains` function. `contains` searches for columns that contain a specific string. Note that it does not work with regular  expressions, but searches for exactly the string you specify. By default, however, the function is not case-sensitive. It doesn"t matter if your columns are in uppercase or lowercase. If you are concerned about case sensitivity, set the `ignore.case` argument to `FALSE` (this also works with `starts_with`, `ends_with`, and `matches`). Unlike contains, `matches` works with regular expressions.
+Next we have the `contains` function. `contains` searches for columns that contain a specific string. Note that it does not work with regular  expressions, but searches for exactly the string you specify. By default, however, the function is not case-sensitive. It doesn´t matter if your columns are in uppercase or lowercase. If you are concerned about case sensitivity, set the `ignore.case` argument to `FALSE` (this also works with `starts_with`, `ends_with`, and `matches`). Unlike contains, `matches` works with regular expressions.
 
 The function `num_range` is useful if your column names follow a certain pattern.
 
@@ -1840,6 +1846,133 @@ billboard %>%
 
 # using slice()
 myresults <- slice(snowdata, 60:76)
+
+# using a vector of indices with slice()
+economics %>%
+  rownames_to_column(var = "row_number") %>%
+  slice(c(4, 8, 10))
+
+# removing the fist row in a data set
+economics %>%
+  slice(-1)
+
+# removing the last row
+economics %>%
+  slice(-nrow(.))
+
+# how to slice off the top and bottom of a data frame
+# getting the data
+survey_results <- tribble(
+  ~id, ~name, ~pre, ~post,
+  1, "Test", 4, 4,
+  2, "Test", 6, 8,
+  3, "Millner", 2, 9,
+  4, "Josh", 4, 7,
+  5, "Bob", 3, 4
+)
+
+# slicing the top n rows of a data frame
+survey_results %>%
+  slice_tail(
+    n = nrow(.) - 2
+  )
+# or
+survey_results %>%
+  slice_tail(n = 3)
+# or
+survey_results %>%
+  filter(name != "Test")
+
+# slicing the bottom n rows
+survey_results %>%
+  slice_head(
+    n = 2
+  )
+
+# how to slice rows with the highest and lowest values in a given column
+# with filter
+economics %>%
+  filter(unemploy >= sort(.$unemploy, decreasing = TRUE)[10]) %>%
+  arrange(desc(unemploy)) %>%
+  select(date, unemploy)
+
+# with slice_max()
+economics %>%
+  slice_max(
+    order_by = unemploy,
+    n = 10
+  ) %>%
+  select(date, unemploy)
+
+# the percentage of rows with the highest value
+economics %>%
+  slice_max(
+    order_by = unemploy,
+    prop = .1
+  )
+
+# rows with the lowest values in a given column
+economics %>%
+  slice_min(
+    order_by = unemploy,
+    n = 3
+  )
+
+# how to combine the slice functions with group_by
+(highest_unemploy_per_month <- economics %>%
+  group_by(year = year(date)) %>%
+  slice_max(
+    order_by = unemploy,
+    n = 1
+  ) %>%
+  ungroup()) # At the end we terminate the grouping function with ungroup. Otherwise we would not apply the next functions to the whole data frame, but to the individual groups.
+
+# visualizing the results
+highest_unemploy_per_month %>%
+  mutate(
+    month = month(date) %>% as.factor()
+  ) %>%
+  count(month) %>%
+  ggplot(aes(x = month, y = n)) +
+  geom_col()
+
+# how to create bootstraps with slice_sample
+economics %>%
+  slice_sample(n = 20)
+
+# setting replacement
+set.seed(455)
+(sample_with_replacement <- economics %>%
+  slice_sample(prop = 1, replace = TRUE))
+
+# getting duplicates
+sample_with_replacement %>%
+  janitor::get_dupes()
+
+# creating bootstrap
+bootstraps <- map(1:2000, ~ slice_sample(economics, prop = 1, replace = TRUE))
+bootstraps %>% head(n = 2)
+
+# getting the mean from the bootstraps
+means <- map_dbl(bootstraps, ~ mean(.$unemploy))
+p1 <- ggplot(NULL, aes(x = means)) +
+  geom_histogram(fill = "grey80", color = "black") +
+  labs(x = "means slice_sample")
+
+# getting the mean of our data set (pretty close to the mean value of our bootstraps!)
+economics$unemploy %>% mean
+
+# comparing our bootstraps with the one created with tidymodels
+boostraps_tidymodels <- rsample::bootstraps(economics, times = 2000)
+means_tidymodels <- map_dbl(
+  boostraps_tidymodels$splits,
+  ~ mean(rsample::analysis(.)$unemploy)
+)
+
+p2 <- ggplot(NULL, aes(x = means_tidymodels)) +
+  geom_histogram(fill = "grey80", color = "black")
+
+(p1 | p2)
 
 # arranging data frames
 # ascending order
@@ -2048,7 +2181,6 @@ typo_dframe <- tribble(
     )
   ))
 ```
-
 ## Packages
 
 __data.table__ and the __tidyverse__ packages offer simpler solutions and speed up the workflow for the types of problems we are dealing with. Both can be used for the same tasks. You can learn one of them or both. The syntax used for data.table is often more concise and arguably more consistent than that in dplyr (it is in essence an extension of the `[i, j]` notation that we have already used for data frames). Second, it is fast and memory-efficient, which makes a huge difference if you are working with big data. On the other hand, many people prefer the syntax in dplyr and __tidyr__, which lends itself exceptionally well for usage with pipes. If you work with small or medium-sized datasets, the difference in performance between the two packages is negligible. __dplyr__ is also much better suited for working directly with databases, which is a huge selling point if your data already is in a database.
