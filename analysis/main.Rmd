@@ -522,6 +522,26 @@ head(data_df)
 contributions <- map_df(list.files("input/mayor_finance_reports", full.names = TRUE), rio::import)
 head(contributions)
 
+# another example using r loops
+# getting the list of data files
+sheets <- list.files("input/covid_data", full.names = TRUE)
+
+# importing the data and saving as one big data frame
+for (i in 1:length(sheets)) {
+  df <- read_csv(sheets[i])
+
+  # if first time looping, save df as big_df
+  if (i == 1) {
+    big_df <- df
+  } else {
+    # if not the first time looping, then rbind it to big_df
+    big_df <- rbind(big_df, df)
+  }
+
+  print(nrow(big_df))
+}
+glimpse(big_df)
+
 # using janitor::tabyl() function to count number of rows within a group
 contributions <- map_df(list.files("input/mayor_finance_reports", full.names = TRUE), rio::import) %>%
   filter(City == "Framingham", !str_detect(tolower(Address), "box")) %>%
@@ -3828,7 +3848,7 @@ results <- results %>%
 results
 ```
 
-# Web scraping
+# Web scraping and APIs
 
 ## Packages
 
@@ -3904,6 +3924,55 @@ tables
 laureates <- rvest::html_table(tables[[1]], fill = TRUE)
 head(laureates)
 ```
+
+### APIs
+
+Sometimes you may not need to scrape a website if you can find the JSON a website loads to run. If you enable “Inspect Element” in your browser, you can see all the pieces that a website needs to run when you reload it. If you scrape data, try to follow these general rules:
+
+1. Do not overwhelm their servers. Put in pauses so you’re not effectively running a distributed denial of service attack on them.
+2. Do not display any raw data that could identify individuals in the data
+3. Only show data relevant to your story and proves your methodology and not any proprietary information
+
+```{r}
+# getting JSON requests from APIs
+url <-"https://arcos-api.ext.nile.works/v1/combined_county_annual?key=WaPo&county=Mingo&state=WV"
+mingo <- fromJSON(url)
+mingo
+
+# getting more data
+base <- "https://arcos-api.ext.nile.works/v1/combined_county_annual"
+county <- "Palm Beach"
+county <- URLencode(county)
+state <- "FL"
+info_key <- "key=WaPo"
+
+API_URL <- str_c(base, "?county=", county, "&state=", state, "&", info_key)
+
+fromJSON(API_URL)
+
+# looping to make an API call
+counties <- c("Broward", "Miami-Dade", "Palm Beach")
+base <- 'https://arcos-api.ext.nile.works/v1/combined_county_annual'
+
+for (i in 1:length(counties)) {
+  county <- counties[i]
+  county <- URLencode(county)
+  state <- "FL"
+  info_key <- "key=WaPo"
+  API_URL <- str_c(base, "?county=", county, "&state=", state, "&", info_key)
+
+  df <- fromJSON(API_URL)
+
+  if (i == 1) {
+    tidy_df <- df
+  } else {
+    tidy_df <- rbind(tidy_df, df)
+  }
+}
+
+tidy_df
+```
+
 # Linting
 
 The code in this RMarkdown is linted with the [lintr package](https://github.com/jimhester/lintr), which is based on the [tidyverse style guide](http://style.tidyverse.org/).
