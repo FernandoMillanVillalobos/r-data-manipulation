@@ -1515,6 +1515,7 @@ Hmisc::describe(snowdata)
 psych::describe(snowdata)
 skim(snowdata)
 ```
+
 # Subsetting and modifying data frames
 
 ## Base-R
@@ -1788,6 +1789,11 @@ You can combine the different selection functions with the `&` and `|` operators
 With `mutate` you normally specify the new column to be created or overwritten. With `across` you don’t have to do that. Without specifying the `.names` argument, the names of your columns remain the same, you just apply the function(s) to those columns.
 
 When we impute missing values, we replace them with substituted values.
+
+Some of the simplest calculations in R can be confusing at times. For instance, `mean`, `sum`, `min`, `max`, and `median` are not a vectorized function because it does not perform its calculations vector by vector. Instead, it throws each vector into a box and calculates the overall average of all its values. So the problem occurs with functions that are not vectorized (e.g. `mean`) and with base R functions that compute summary statistics. `rowwise` was introduced in dplyr in 2020 with version 1.1.0. Essentially, the function ensures that operations are performed row by row. It works similar to `group_by`. It does not change how the data frame looks, but how calculations are performed with the data frame. It is not possible to add a tidyselect function within `mean` or any of the other functions. In these cases `c_across` comes to your rescue. It was developed especially for rowwise and can be considered a wrapper around `c()`. Instead of `c()` you can use any tidyselect function of your choice. When using rowwise functions The most common mistake is forgetting to `ungroup` the data frame. I told you that rowwise does nothing but group the data so that the calculations are performed row by row. Similar to `group_by`, rowwise can also be ungrouped with `ungroup()`. If you don’t do that, problems like this can occur.
+
+A nice use case of `rowwise` is to convert your values into proportions. To calculate proportions, you must first calculate the sum of all values.Since the data is in a wide format, this can be done with rowwise. For small data sets `rowwise` is sufficient. However, if your data frame is very large, `rowwise`
+will show performance problems compared to alternative approaches. You can use other functions to calculate summary statistics on a row-by-row basis without using `rowwise`. If you are working with really large data frames, keep in mind that `rowwise` is not the most efficient method. Consider the alternatives. For instance, `pmin` and `pmax` calculate the minimum and maximum value for one or more vectors. Another one is `rowSums` which calculates the sums for rows. The function works with a matrix or a data frame. Providing a vector of values will not work, so we have to use a matrix trick to make it work. We can calculate the mean of each row with `rowMeans`.
 
 ```{r}
 snowdata <- rio::import("input/BostonChicagoNYCSnowfalls.csv")
@@ -2200,6 +2206,124 @@ typo_dframe <- tribble(
       )
     )
   ))
+
+# how to do rowwise calculations
+# getting the data
+(dframe <- tibble(
+name = c("Jakob", "Eliud", "Jamal", "Emily"),
+first = c(1, 4, 7, 10),
+second = c(2, 5, 8,11),
+third = c(3, 6, 9, 12)
+))
+
+# calculating the mean (rowwise)
+dframe %>%
+  rowwise() %>%
+  mutate(
+    mean_performance = mean(c(first, second, third))
+  )
+# or with group_by()
+dframe %>%
+  group_by(name) %>%
+  mutate(
+    mean = mean(c(first, second, third))
+  )
+
+# with other summary statistics
+dframe %>%
+  rowwise() %>%
+  mutate(
+    mean_performance = mean(c(first, second, third)),
+    sum_performance = sum(c(first, second, third)),
+    min_performance = min(c(first, second, third)),
+    max_performance = max(c(first, second, third)),
+    median_performance = median(c(first, second, third))
+  )
+
+# how to use tidyselect functions with rowwise
+dframe %>%
+  rowwise() %>%
+  mutate(
+    mean_performance = mean(c_across(c(first, second, third)))
+  )
+
+# c_across with other tidyverse functions
+billboard %>%
+  rowwise() %>%
+  transmute(
+    artist,
+    track,
+    sum = sum(c_across(contains("wk")), na.rm = TRUE)
+  )
+
+# rowwise without ungroup() -> wrong!
+dframe %>%
+  rowwise() %>%
+  mutate(
+    mean = mean(c(first, second, third))
+  ) %>%
+  summarise(
+    mean_across_students = mean(mean)
+  )
+
+# with ungroup()
+dframe %>%
+  group_by(name) %>%
+  mutate(
+    mean = mean(c(first, second, third))
+  ) %>%
+  ungroup() %>%
+  summarise(
+    mean_across_students = mean(mean)
+  )
+
+# calculating proportions with rowwise
+(sums_per_row <- dframe %>%
+  rowwise() %>%
+  mutate(sum_per_row = sum(first, second, third)) %>%
+  ungroup())
+
+sums_per_row %>%
+  transmute(
+    name,
+    across(
+      .cols = where(is.numeric),
+      .fns = ~ . / sum_per_row
+    )
+  )
+
+# using pmin() and pmax()
+dframe %>%
+  mutate(
+    max = pmax(first, second, third),
+    min = pmin(first, second, third)
+  )
+
+# using rowSums() with a matrix
+dframe %>%
+  mutate(
+    sum = rowSums(matrix(c(first, second, third), ncol = 3))
+  )
+
+# using a subset of a data frame
+rowSums(dframe %>% select(-name))
+
+# not using a matrix
+dframe %>%
+  mutate(
+    sum1 = rowSums(select(., first, second, third)),
+    sum2 = rowSums(across(first:third)),
+    sum3 = rowSums(select(., matches("first|second|third"))),
+  )
+
+# using rowMeans()
+dframe %>%
+  mutate(
+    sum1 = rowMeans(matrix(c(first, second, third), ncol = 3)),
+    sum2 = rowMeans(across(first:third)),
+    sum3 = rowMeans(select(., first, second, third)),
+    sum4 = rowMeans(select(., matches("first|second|third")))
+  )
 ```
 ## Packages
 
