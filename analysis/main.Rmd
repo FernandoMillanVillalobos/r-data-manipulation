@@ -958,6 +958,12 @@ En lugar de encapsular y encadenar `ifelse()`, podemos usar la función `case_wh
 
 Nuestro conjunto de datos contiene datos diarios desde el 1 de enero de 1980 hasta el 31 de diciembre de 2015. Así que únicamente debemos crear un vector con fechas de este periodo. En la función `complete()` indicamos la columna que queremos completar y le asignamos el vector entero de fechas. El resultado es un nuevo `data.frame` con todas las fechas, rellenando el resto de columnas con NA.
 
+The functions `complete`, `expand`, `nesting`, and `crossing` find combinations of values in vectors or columns. First, `complete` makes an existing data frame longer by converting implicit values to existing values. This means that combinations of values that are not present in the data are created as new rows. `complete` only works with the values that are already in the data. `expand`, in contrast, creates a new tibble. The tibble represents either all possible combinations of values or the unique combinations of values (with nesting). The `expand` function does something very similar to `complete`. However, instead of adding new rows with the complete set of values, a new data frame is created only for the columns you specify in the function. Suppose you have an incomplete tibble with months and years, in which the combination of the month “February” and the year 2013 is missing. You can use `expand` to create a complete set of years and months, including the combination of February and 2013. `complete` is actually a wrapper around `expand.` In other words, it is expand combined with `full_join`. With `complete` and `expand` we have completed data frames for missing rows. Sometimes, however, we are interested in the unique combinations of values in a data frame. This is basically the opposite of what we just did. Instead of finding all combinations of values we are looking for the unique combinations; in a given data frame! In this way the data shows what happened, not what didn’t happen.
+
+`crossing` works similarly to `expand`, except that it uses vectors to create combinations of values in a data frame. However, as we will see later, `expand` can also do this. The difference from the other functions is that `crossing` does not need an existing data frame. `crossing` is usually a starting point for further analyses.
+
+![Complete, expand, nesting and crossing functions](input/img/expand-df.png)
+
 The `extract` function is basically the separate function with super powers and works with groups instead of separators. The `separate` function allows you to split a character variable into multiple variables. The key difference between `separate` and `extract` is that `extract` works with groups within its regular expressions. Each captured group is converted into a new column. So instead of thinking of the separator in separate with `extract`, we think of groups. `extract` takes a few arguments:
 
 - _col_ specifies the character column to be split into several columns.
@@ -1034,6 +1040,142 @@ date_ts <- seq(lubridate::ymd("1980-01-01"), lubridate::ymd("2015-12-31"), "day"
 # using complete()
 data_vigo_subset <- complete(data_vigo_subset, date = date_ts)
 head(data_vigo_subset)
+
+# getting the data
+running_races_anna <- tribble(
+  ~year, ~race, ~minutes,
+  2010, "half marathon", 110,
+  2011, "marathon", 230,
+  2013, "half marathon", 105,
+  2016, "10km", 50,
+  2018, "10km", 45,
+  2018, "half marathon", 100,
+  2022, "marathon", 210
+)
+
+# creating new rows representing the runs (=race) in which it did not participate -> missing years
+running_races_anna %>%
+  complete(year, race)
+
+# including all years present in the data (2012 and 2014 also)
+running_races_anna %>%
+  complete(year = 2010:2022, race)
+
+# including more variables (="ultra marathons")
+running_races_anna %>%
+  complete(year = 2010:2022, race = c(race, "ultra marathons"))
+
+# using expand()
+running_races_anna %>%
+  expand(year, race)
+
+# including all years present in the data
+running_races_anna %>%
+  expand(year = 2010:2022, race)
+# or
+running_races_anna %>%
+  expand(year = full_seq(year, 1), race) # 1 indicates that the years should be incremented by 1 each time
+
+# adding the missing data (="minutes")
+(all_running_races_anna <- running_races_anna %>%
+  expand(year = full_seq(year, 1), race) %>%
+  full_join(running_races_anna, by = c("year", "race")))
+
+# complete() and expand() with group_by()
+# getting the data
+running_races_club <- tribble(
+  ~year, ~runner, ~race, ~minutes,
+  2012, "Eva", "half marathon", 109,
+  2013, "Eva", "marathon", 260,
+  2022, "Eva", "half marathon", 120,
+  2018, "John", "10km", 51,
+  2019, "John", "10km", 49,
+  2020, "John", "10km", 50,
+  2019, "Leonie", "half marathon", 45,
+  2020, "Leonie", "10km", 45,
+  2021, "Leonie", "half marathon", 102,
+  2022, "Leonie", "marathon", 220
+)
+
+#  with group_by we expand the rows only within the runners (missing years by certain runners)
+(all_running_races_club_correct <- running_races_club %>%
+  group_by(runner) %>%
+  expand(year = full_seq(year, 1), race = c(
+    "10km", "half marathon",
+    "marathon"
+  )) %>%
+  ungroup())
+
+# getting the actual data of the three runners (=all years)
+(complete_running_races_club <- all_running_races_club_correct %>%
+  left_join(running_races_club, by = c("year", "runner", "race")))
+
+# or using complete()
+running_races_club %>%
+  group_by(runner) %>%
+  complete(year = full_seq(year, 1), race = c(
+    "10km", "half marathon",
+    "marathon"
+  )) %>%
+  ungroup()
+
+# adding more analysis -> counting the number of races that a runner has or has not completed
+(count_races <- complete_running_races_club %>%
+  count(runner, race, missed_races = is.na(minutes)))
+
+# completing row missing where the missed_races column is set to FALSE using fill()
+count_races %>%
+  complete(runner, race, missed_races, fill = list(n = 0)) # fill() allows us turn NAs to actual values.
+
+# calculating the percentage of races the runners participated in
+count_races %>%
+  complete(runner, race, missed_races, fill = list(n = 0)) %>%
+  pivot_wider(names_from = missed_races, values_from = n) %>%
+  mutate(
+    percent_races = round((`FALSE` / (`TRUE` + `FALSE`)) * 100, 1)
+  )
+
+# plotting
+count_races %>%
+  complete(runner, race, missed_races, fill = list(n = 0)) %>%
+  pivot_wider(names_from = missed_races, values_from = n) %>%
+  mutate(
+    percent_races = round((`FALSE` / (`TRUE` + `FALSE`)) * 100, 1)
+  ) %>%
+  ggplot(aes(x = race, y = percent_races)) +
+  scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+  geom_col() +
+  facet_wrap(vars(runner))
+
+# looking for the unique combinations in a data frame with expand() and nesting() -> what happened
+running_races_club %>%
+  expand(nesting(runner, race))
+
+# finding out which runs the runners have never participated -> what didn´t happen
+full_combinations_runners <- expand(running_races_club, runner,
+  race = c("10km", "half marathon", "marathon")
+)
+
+full_combinations_runners %>%
+  anti_join(running_races_club, by = c("runner", "race"))
+
+# creating a data set with crossing()
+crossing(
+  year = 1905:2022,
+  major = c(
+    "Australien Open", "French Open",
+    "Wimbledon", "US Open"
+  )
+)
+
+# another example
+crossing(
+  year = 2006:2022,
+  races = c(
+    "Tokyo", "Boston", "Chicago",
+    "London", "Berlin", "New York"
+  )
+)
 
 # using extract()
 # example with separate()
@@ -1155,6 +1297,7 @@ results_regexp <- results %>%
   )
 tail(results_regexp)
 ```
+
 Techniques for __anonymizing__ and __pseudoanonymizing__ columns avoid data breaches that they are potentially dangerous for those affected. For that We will find out how to use the function `fct_anon`, how to replace names with random names, how to mask values, how to group numeric variables, how to remove house numbers from street names, and how to encode and decode values.The difference between pseudonymization and anonymization is that pseudonymization is reversible, while anonymization is not.
 
 The EU defines pseudonymization as follows:
@@ -2257,25 +2400,25 @@ billboard %>%
   )
 
 # rowwise without ungroup() -> wrong!
-dframe %>%
-  rowwise() %>%
-  mutate(
-    mean = mean(c(first, second, third))
-  ) %>%
-  summarise(
-    mean_across_students = mean(mean)
-  )
-
-# with ungroup()
-dframe %>%
-  group_by(name) %>%
-  mutate(
-    mean = mean(c(first, second, third))
-  ) %>%
-  ungroup() %>%
-  summarise(
-    mean_across_students = mean(mean)
-  )
+# dframe %>%
+#   rowwise() %>%
+#   mutate(
+#     mean = mean(c(first, second, third))
+#   ) %>%
+#   summarize(
+#     mean_across_students = mean(mean)
+#   )
+# 
+# # with ungroup()
+# dframe %>%
+#   group_by(name) %>%
+#   mutate(
+#     mean = mean(c(first, second, third))
+#   ) %>%
+#   ungroup() %>%
+#   summarise(
+#     mean_across_students = mean(mean)
+#   )
 
 # calculating proportions with rowwise
 (sums_per_row <- dframe %>%
